@@ -406,7 +406,7 @@ setTimeout(function(){
       <div class="settings-grid">
         <div class="setting-card" id="time-group">
           <div class="simple-label">⏱ Время теста (в секундах)</div>
-          <input id="time-custom" class="simple-input" type="number" min="1" inputmode="numeric" placeholder="Установите время">
+          <input id="time-custom" class="simple-input" type="number" min="1" inputmode="numeric" value="600" placeholder="600">
         </div>
 
         <div class="setting-card" id="count-group">
@@ -995,12 +995,12 @@ function setRunMode(mode){
   }else{
     ['time-custom','count-select','count-custom'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false});
     const tc=document.getElementById('time-custom'),cc=document.getElementById('count-custom');
-    if(tc){tc.disabled=noTime;tc.placeholder='Установите время';}
+    if(tc){tc.disabled=noTime;tc.placeholder='600';if(!noTime && !tc.value)tc.value='600';}
     if(cc)cc.placeholder='своё';
   }
 }
 function onTimeSelectChange(){return true}
-function getChosenSeconds(){if(noTime)return 0;const custom=parseInt(document.getElementById('time-custom')?.value||'',10);return custom>0?custom:0}
+function getChosenSeconds(){if(noTime)return 0;const custom=parseInt(document.getElementById('time-custom')?.value||'600',10);return custom>0?custom:600}
 function getChosenPool(){
   const type=(document.getElementById('count-select')?.value||'all');
   let pool=[...database],sourceLabel='Все вопросы';
@@ -1019,6 +1019,14 @@ function getChosenCount(poolLength,type){
 }
 function getQuestionId(q){return String(q.id||q.num||q.question)}
 function shuffle(a){const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x}
+function shuffleQuestionOptions(q){
+  const opts=Array.isArray(q.options)?q.options:[];
+  const answerIndex=Number.isFinite(Number(q.answer))?Number(q.answer):0;
+  if(opts.length<2)return {...q,options:[...opts],answer:answerIndex};
+  const mixed=shuffle(opts.map((text,i)=>({text,i})));
+  const newAnswer=mixed.findIndex(x=>x.i===answerIndex);
+  return {...q,options:mixed.map(x=>x.text),answer:newAnswer>=0?newAnswer:answerIndex,answerText:opts[answerIndex]||q.answerText||''};
+}
 function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
 
 function startTest(){
@@ -1028,6 +1036,7 @@ function startTest(){
   if(!pool.length){showConfigError(type==='mistakes'?'Ошибок пока нет.':type==='favorites'?'В избранном нет вопросов.':'В диапазоне нет вопросов.');return}
   const count=getChosenCount(pool.length,type);
   let selected=orderMode==='random'?shuffle(pool).slice(0,count):pool.slice(0,count);
+  selected=selected.map(shuffleQuestionOptions);
   if(!selected.length){showConfigError('Не удалось собрать тест.');return}
   const totalSeconds=getChosenSeconds();
   if(!noTime && totalSeconds<=0){showConfigError('Укажите время теста в секундах. Например: 600');return}
@@ -1144,7 +1153,7 @@ function startRealExam(){
   if(!to||to<from)to=database.length;
   pool=pool.filter(q=>{const n=parseInt(q.num||0,10);return !n||(n>=from&&n<=to)});
   if(!pool.length){showConfigError('В диапазоне нет вопросов.');return}
-  realExamQuestions=(orderMode==='random'?shuffle(pool):pool).slice(0,25);
+  realExamQuestions=(orderMode==='random'?shuffle(pool):pool).slice(0,25).map(shuffleQuestionOptions);
   if(realExamQuestions.length<25){showConfigError(`Только ${realExamQuestions.length} вопросов. Нужно минимум 25.`);return}
   realExamAnswers=Array(realExamQuestions.length).fill(null);
   realExamFinished=false;realExamTotalSeconds=1800;realExamTimeLeft=1800;
