@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>QuizBot Admin</title>
+<style>
+:root{--bg:#08101f;--card:#111a2f;--card2:#0d1527;--line:#263653;--text:#f5f7ff;--muted:#9daecd;--blue:#2563eb;--green:#22c55e;--red:#fb4d65;--yellow:#fbbf24;--purple:#7c3aed;--cyan:#06b6d4}*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#080d1a,#111a32 58%,#08101e);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}.wrap{max-width:980px;margin:0 auto;padding:16px 12px 40px}h1{font-size:24px;margin:0 0 4px}h2{font-size:18px;margin:0 0 12px}.sub{color:var(--muted);font-size:13px;line-height:1.35}.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.status{padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:#10182a;color:#bcd0ef;white-space:nowrap;font-size:13px}.card{background:rgba(17,26,47,.96);border:1px solid var(--line);border-radius:18px;padding:15px;margin:12px 0;box-shadow:0 14px 36px rgba(0,0,0,.22)}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}@media(max-width:780px){.grid2,.grid3{grid-template-columns:1fr}.top{display:block}.status{display:inline-block;margin-top:10px}}label{display:block;font-size:12px;color:#bdd0ed;margin:10px 0 6px}input,textarea,select{width:100%;border:1px solid #344461;background:#0c1427;color:var(--text);border-radius:12px;padding:12px;font-size:15px;outline:0}textarea{min-height:90px;resize:vertical;font-family:inherit}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:800;color:#fff;background:#33415f;cursor:pointer}.btn:active{transform:scale(.98)}.btn.green{background:var(--green);color:#052e16}.btn.red{background:var(--red)}.btn.blue{background:var(--blue)}.btn.yellow{background:var(--yellow);color:#2a1600}.btn.purple{background:var(--purple)}.btn.cyan{background:var(--cyan);color:#022a33}.btn.full{width:100%}.danger{background:linear-gradient(135deg,rgba(251,77,101,.15),rgba(17,26,47,.96))}.mini{font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px}.hidden{display:none}.result{white-space:pre-wrap;background:#071020;border:1px solid #283855;border-radius:14px;padding:12px;min-height:80px;max-height:260px;overflow:auto;color:#dbe7ff;font-size:13px}.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:2px;margin:12px 0}.tab{border:1px solid var(--line);background:#10182a;color:#dfeaff;border-radius:999px;padding:10px 13px;font-weight:800;white-space:nowrap}.tab.active{background:#2563eb;border-color:#60a5fa}.pane{display:none}.pane.active{display:block}.list{max-height:310px;overflow:auto;display:grid;gap:8px}.item{background:#0d1527;border:1px solid #263653;border-radius:13px;padding:10px}.item b{font-size:14px}.item div{font-size:12px;color:#aab8d2;margin-top:4px;line-height:1.35}.empty{border:1px dashed #344461;color:#93a5c4;border-radius:12px;padding:12px;text-align:center}.ok{color:#86efac}.bad{color:#fecaca}.filebox{background:#0d1527;border:1px dashed #3b4c6f;border-radius:14px;padding:13px}.split-title{display:flex;justify-content:space-between;gap:8px;align-items:center}.stat{background:#0d1527;border:1px solid #263653;border-radius:14px;padding:12px}.stat b{display:block;font-size:22px}.stat span{font-size:12px;color:#9fb0d0}.toast{position:fixed;left:12px;right:12px;bottom:12px;background:#0c1427;border:1px solid #344461;border-radius:14px;padding:12px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.3);display:none;z-index:20}.toast.show{display:block}.mutedbtn{font-size:12px;color:#9fb0d0;background:transparent;border:0;text-decoration:underline;padding:8px;cursor:pointer}.advanced{border-top:1px solid #263653;margin-top:12px;padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><h1>QuizBot Admin</h1><div class="sub">Простая панель: премиум, бан, device lock, название предмета, вопросы и отчёты.</div></div>
+    <div class="status" id="status"><span class="bad">●</span> не подключено</div>
+  </div>
+
+  <div class="card">
+    <h2>🔐 Вход</h2>
+    <div class="grid2">
+      <div><label>Backend URL</label><input id="backend" placeholder="https://your-site.netlify.app"></div>
+      <div><label>ADMIN_SECRET</label><input id="secret" type="password" placeholder="Пароль админки"></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn blue" onclick="saveSettings(true)">Сохранить и подключиться</button>
+      <button class="btn" onclick="refreshAll()">Обновить данные</button>
+    </div>
+    <div class="mini">Один раз вводишь ссылку и пароль. Потом браузер запомнит.</div>
+    <button class="mutedbtn" onclick="toggleAdvanced()">Показать редкие кнопки</button>
+    <div id="advanced" class="advanced hidden">
+      <div class="row">
+        <button class="btn" onclick="health()">Проверить backend</button>
+        <button class="btn yellow" onclick="initAccess()">Подготовить KV доступ</button>
+      </div>
+      <div class="mini">Эти кнопки нужны только если backend/KV настраивается впервые или что-то сломалось.</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showPane('access',this)">Доступ</button>
+    <button class="tab" onclick="showPane('subject',this)">Предмет</button>
+    <button class="tab" onclick="showPane('questions',this)">Вопросы</button>
+    <button class="tab" onclick="showPane('reports',this)">Отчёты</button>
+    <button class="tab" onclick="showPane('lists',this)">Списки</button>
+  </div>
+
+  <div id="access" class="pane active">
+    <div class="grid2">
+      <div class="card">
+        <h2>⭐ Премиум</h2>
+        <label>Telegram ID</label><input id="premId" inputmode="numeric" placeholder="5305261101">
+        <div class="grid2"><div><label>Дней</label><input id="premDays" type="number" min="0" value="30"></div><div><label>Дата окончания, необязательно</label><input id="premExpires" type="date"></div></div>
+        <label>Device fingerprint, необязательно</label><input id="premFp" placeholder="45A2C438">
+        <label>Заметка для себя</label><input id="premNote" value="Выдано вручную">
+        <div class="row" style="margin-top:12px"><button class="btn green" onclick="givePremium()">Выдать премиум</button><button class="btn red" onclick="removePremium()">Убрать</button><button class="btn" onclick="checkUserFromPremium()">Проверить</button></div>
+        <div class="mini">Fingerprint можно оставить пустым.</div>
+      </div>
+      <div class="card danger">
+        <h2>🚫 Бан</h2>
+        <label>Telegram ID</label><input id="banId" inputmode="numeric" placeholder="5305261101">
+        <label>Описание для пользователя</label><textarea id="banReason">Вы использовали читы</textarea>
+        <label>До даты, необязательно</label><input id="banUntil" type="date">
+        <div class="row" style="margin-top:12px"><button class="btn red" onclick="banUser()">Забанить</button><button class="btn green" onclick="unbanUser()">Разбанить</button></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>🔒 Device lock</h2>
+        <label>Telegram ID</label><input id="devId" inputmode="numeric" placeholder="5305261101">
+        <label>Fingerprint</label><input id="devFp" placeholder="45A2C438">
+        <label>Сообщение</label><input id="devReason" value="Доступ с другого устройства запрещён">
+        <div class="row" style="margin-top:12px"><button class="btn purple" onclick="lockDevice()">Привязать</button><button class="btn red" onclick="unlockDevice()">Снять</button></div>
+      </div>
+      <div class="card danger">
+        <h2>🧹 Убрать премиум у всех</h2>
+        <div class="mini">Баны и device lock не удаляются.</div>
+        <button class="btn red full" onclick="clearAllPremium()">Убрать премиум у всех</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="subject" class="pane">
+    <div class="card">
+      <h2>🏷️ Название предмета</h2>
+      <div class="grid3">
+        <div><label>Полное название</label><input id="subjectTitle" placeholder="Маркетинг"></div>
+        <div><label>Короткое название</label><input id="subjectShort" placeholder="Маркетинг"></div>
+        <div><label>Эмодзи</label><input id="subjectEmoji" placeholder="📚" maxlength="4"></div>
+      </div>
+      <div class="row" style="margin-top:12px"><button class="btn green" onclick="saveSubjectName()">Сохранить название</button><button class="btn" onclick="questionsInfo()">Загрузить текущее</button></div>
+    </div>
+  </div>
+
+  <div id="questions" class="pane">
+    <div class="card">
+      <div class="split-title"><h2>📝 Вопросы</h2><button class="btn" onclick="questionsInfo()">Количество</button></div>
+      <div class="grid3" id="qStats"><div class="stat"><b>—</b><span>вопросов</span></div><div class="stat"><b>tests_data</b><span>KV ключ</span></div><div class="stat"><b>—</b><span>версия</span></div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Загрузить tests.json</h2>
+        <div class="filebox"><input type="file" id="testsFile" accept=".json,application/json" onchange="readTestsFile()"></div>
+        <textarea id="testsJson" placeholder="Или вставь JSON сюда"></textarea>
+        <div class="row" style="margin-top:12px"><button class="btn green" onclick="importQuestions()">Сохранить вопросы в KV</button><button class="btn red" onclick="clearQuestionsBox()">Очистить поле</button></div>
+      </div>
+      <div class="card">
+        <h2>Экспорт</h2>
+        <button class="btn blue full" onclick="exportQuestions()">Получить текущие вопросы</button>
+        <div style="height:10px"></div>
+        <button class="btn purple full" onclick="downloadLastQuestions()">Скачать JSON</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="reports" class="pane">
+    <div class="card">
+      <h2>📨 Куда отправлять отчёты</h2>
+      <div class="grid2">
+        <div>
+          <label>Токен бота для отчётов</label>
+          <input id="reportToken" type="password" placeholder="123456789:AA...">
+          <div class="mini" id="reportTokenInfo">Сохранённый токен: —</div>
+        </div>
+        <div>
+          <label>Telegram ID / Chat ID получателя</label>
+          <input id="reportChatId" inputmode="numeric" placeholder="5305261101 или -100...">
+          <div class="mini">Для личного аккаунта сначала нажми /start в этом боте.</div>
+        </div>
+      </div>
+      <label>Текст тестового отчёта</label>
+      <textarea id="reportTestText">✅ Тестовый отчёт от QuizBot</textarea>
+      <div class="row" style="margin-top:12px">
+        <button class="btn green" onclick="saveReportSettings()">Сохранить отчёты</button>
+        <button class="btn blue" onclick="loadReportSettings()">Загрузить текущее</button>
+        <button class="btn purple" onclick="testReport()">Отправить тест</button>
+      </div>
+      <div class="mini">Теперь токен и ID для отчётов можно менять прямо тут, без Netlify Environment variables.</div>
+    </div>
+  </div>
+
+  <div id="lists" class="pane">
+    <div class="card"><div class="split-title"><h2>📋 Списки</h2><button class="btn blue" onclick="refreshLists()">Обновить</button></div>
+      <div class="grid3"><div><h3>Премиум</h3><div id="premiumList" class="list"><div class="empty">Пусто</div></div></div><div><h3>Бан</h3><div id="banList" class="list"><div class="empty">Пусто</div></div></div><div><h3>Device lock</h3><div id="deviceList" class="list"><div class="empty">Пусто</div></div></div></div>
+    </div>
+    <div class="card"><div class="split-title"><h2>Ответ backend</h2><button class="btn" onclick="copyResult()">Копировать</button></div><div class="result" id="result">Ответы будут здесь.</div></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);let lastExport=null;
+function apiBase(){return $('backend').value.trim().replace(/\/+$/,'')}function secret(){return $('secret').value}function cleanId(v){return String(v||'').replace(/\D+/g,'')}function toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2600)}function setStatus(t,ok){$('status').innerHTML=`<span class="${ok?'ok':'bad'}">●</span> ${t}`}function out(d){$('result').textContent=typeof d==='string'?d:JSON.stringify(d,null,2)}function toggleAdvanced(){$('advanced').classList.toggle('hidden')}
+function showPane(id,btn){document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));$(id).classList.add('active');btn.classList.add('active')}
+function loadSettings(){$('backend').value=localStorage.getItem('ep_admin_backend')||location.origin;$('secret').value=localStorage.getItem('ep_admin_secret')||''}async function saveSettings(auto){localStorage.setItem('ep_admin_backend',apiBase());localStorage.setItem('ep_admin_secret',secret());toast('Сохранено');if(auto){await health().catch(()=>{});await questionsInfo().catch(()=>{});await loadReportSettings().catch(()=>{});await refreshLists(false).catch(()=>{})}}
+async function req(path,method='GET',body=null){if(!apiBase())throw new Error('Backend URL пустой');const opt={method,headers:{'X-Admin-Secret':secret()}};if(body){opt.headers['Content-Type']='application/json';opt.body=JSON.stringify(body)}const r=await fetch(apiBase()+path,opt);const text=await r.text();let data;try{data=JSON.parse(text)}catch(e){data={raw:text}}setStatus(r.status+' '+(r.ok?'OK':'ERROR'),r.ok);out(data);if(!r.ok){toast(data.error||'Ошибка');throw new Error(data.error||text||r.statusText)}toast('Готово');return data}
+async function health(){const r=await fetch(apiBase()+'/api/health');const data=await r.json().catch(()=>({status:r.status}));setStatus(r.status+' '+(r.ok?'OK':'ERROR'),r.ok);out(data);return data}async function initAccess(){await req('/api/admin/init','POST',{force:false});await refreshLists(false)}async function refreshAll(){await questionsInfo().catch(()=>{});await loadReportSettings().catch(()=>{});await refreshLists(false).catch(()=>{})}
+async function givePremium(){const user_id=cleanId($('premId').value);if(!user_id)return alert('Впиши Telegram ID');const body={user_id,note:$('premNote').value.trim()||'Выдано вручную'};const expires=$('premExpires').value;const days=Number($('premDays').value||0);const fp=$('premFp').value.trim().toUpperCase();if(expires)body.expires=expires;else if(days>0)body.days=days;if(fp)body.fingerprint=fp;await req('/api/admin/premium','POST',body);await refreshLists(false)}async function removePremium(){const user_id=cleanId($('premId').value);if(!user_id)return alert('Впиши Telegram ID');await req('/api/admin/premium/remove','POST',{user_id});await refreshLists(false)}async function clearAllPremium(){if(!confirm('Точно убрать премиум у ВСЕХ?'))return;const typed=prompt('Для подтверждения напиши: УБРАТЬ');if(typed!=='УБРАТЬ')return alert('Отменено');await req('/api/admin/premium/clear','POST',{confirm:'CLEAR_PREMIUM'});await refreshLists(false)}
+async function banUser(){const user_id=cleanId($('banId').value);if(!user_id)return alert('Впиши Telegram ID');const body={user_id,reason:$('banReason').value.trim()||'Доступ заблокирован.'};if($('banUntil').value){body.until=$('banUntil').value;body.type='temporary'}else body.type='permanent';await req('/api/admin/ban','POST',body);await refreshLists(false)}async function unbanUser(){const user_id=cleanId($('banId').value);if(!user_id)return alert('Впиши Telegram ID');await req('/api/admin/unban','POST',{user_id});await refreshLists(false)}async function lockDevice(){const user_id=cleanId($('devId').value);const fingerprint=$('devFp').value.trim().toUpperCase();if(!user_id)return alert('Впиши Telegram ID');if(!fingerprint)return alert('Впиши Fingerprint');await req('/api/admin/device','POST',{user_id,fingerprint,reason:$('devReason').value.trim()||'Устройство привязано вручную'});await refreshLists(false)}async function unlockDevice(){const user_id=cleanId($('devId').value);if(!user_id)return alert('Впиши Telegram ID');await req('/api/admin/device/remove','POST',{user_id});await refreshLists(false)}async function checkUserFromPremium(){const user_id=cleanId($('premId').value);if(!user_id)return alert('Впиши Telegram ID');const fingerprint=$('premFp').value.trim().toUpperCase();await req('/api/admin/check','POST',{user_id,fingerprint})}
+function escapeHtml(s){return String(s||'').replace(/[&<>\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]))}function renderObj(target,obj,type){const el=$(target);const users=(obj&&obj.users)||{};const entries=Object.entries(users);if(!entries.length){el.innerHTML='<div class="empty">Пусто</div>';return}el.innerHTML=entries.map(([id,u])=>{const active=u&&u.active!==false?'активен':'выключен';const main=type==='premium'?`${u.expires?'до '+u.expires:'без срока'} ${u.fingerprint?' · FP '+u.fingerprint:''}`:type==='ban'?`${u.reason||'без причины'} ${u.until?' · до '+u.until:''}`:`${u.fingerprint||'-'} · ${u.reason||''}`;return `<div class="item"><b>${id}</b><div>${active}<br>${escapeHtml(main)}<br>${escapeHtml(u.note||'')}</div></div>`}).join('')}async function refreshLists(show=true){const data=await req('/api/admin/list','GET');renderObj('premiumList',data.premium_users,'premium');renderObj('banList',data.banned_users,'ban');renderObj('deviceList',data.device_locks,'device');if(!show)out({ok:true,counts:data.counts||{}})}function copyResult(){navigator.clipboard?.writeText($('result').textContent);toast('Скопировано')}
+function updateQStats(data){const total=data.total??'—';const version=data.data_version||'—';const per=data.per_subject?Object.entries(data.per_subject).map(([k,v])=>`${k}: ${v}`).join(', '):'—';const title=data.subject_title||data.counts?.subject_title||'';const short=data.subject_short||data.counts?.subject_short||title||'';const emoji=data.subject_emoji||data.counts?.subject_emoji||'📚';$('subjectTitle').value=title;$('subjectShort').value=short;$('subjectEmoji').value=emoji;$('qStats').innerHTML=`<div class="stat"><b>${total}</b><span>всего вопросов</span></div><div class="stat"><b>${escapeHtml(title||'—')}</b><span>${escapeHtml(per)}</span></div><div class="stat"><b>${escapeHtml(version)}</b><span>версия базы</span></div>`}async function questionsInfo(){const data=await req('/api/admin/tests/info','GET');updateQStats(data)}async function saveSubjectName(){const title=$('subjectTitle').value.trim();const short=$('subjectShort').value.trim()||title;const emoji=$('subjectEmoji').value.trim()||'📚';if(!title)return alert('Напиши название предмета');const data=await req('/api/admin/tests/subject','POST',{title,short,emoji});updateQStats(data.counts||data)}async function readTestsFile(){const f=$('testsFile').files[0];if(!f)return;const text=await f.text();$('testsJson').value=text;try{const data=JSON.parse(text);out({ok:true,file:f.name,preview_counts:countLocalTests(data)})}catch(e){out({ok:false,error:'Файл не похож на JSON: '+e.message})}}function countLocalTests(data){let d=data;if(Array.isArray(d))return {total:d.length,format:'array'};if(d.data&&d.data.subjects)d=d.data;if(d.tests&&Array.isArray(d.tests))return {total:d.tests.length,format:'tests'};if(d.subjects){let total=0,per={};for(const [k,s] of Object.entries(d.subjects)){const n=Array.isArray(s.tests)?s.tests.length:0;per[k]=n;total+=n}return {total,per_subject:per,data_version:d.data_version||''}}return {total:0,warning:'не найден subjects/tests'}}async function importQuestions(){const raw=$('testsJson').value.trim();if(!raw)return alert('Выбери tests.json или вставь JSON');let data;try{data=JSON.parse(raw)}catch(e){return alert('Ошибка JSON: '+e.message)}if(!confirm('Сохранить эти вопросы в KV?'))return;const res=await req('/api/admin/tests/import','POST',data);updateQStats(res.counts||res.meta||res)}async function exportQuestions(){const data=await req('/api/admin/tests/export','GET');lastExport=data.tests_data;$('testsJson').value=JSON.stringify(data.tests_data,null,2);updateQStats(data)}function downloadLastQuestions(){if(!lastExport){try{lastExport=JSON.parse($('testsJson').value)}catch(e){return alert('Сначала нажми Получить текущие вопросы')}}const blob=new Blob([JSON.stringify(lastExport,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tests.json';a.click();URL.revokeObjectURL(a.href)}function clearQuestionsBox(){$('testsJson').value=''}
+async function loadReportSettings(){
+  const data=await req('/api/admin/report-settings','GET');
+  $('reportChatId').value=data.chat_id||'';
+  $('reportTokenInfo').textContent='Сохранённый токен: '+(data.token_mask||'—')+(data.updated?' · обновлён '+data.updated:'');
+  $('reportToken').value='';
+  return data;
+}
+async function saveReportSettings(){
+  const bot_token=$('reportToken').value.trim();
+  const chat_id=$('reportChatId').value.trim();
+  if(!chat_id)return alert('Впиши Telegram ID / Chat ID');
+  if(!bot_token && !$('reportTokenInfo').textContent.includes('...')){
+    if(!confirm('Токен не введён. Сохранить только Chat ID?'))return;
+  }
+  const body={chat_id};
+  if(bot_token)body.bot_token=bot_token;
+  const data=await req('/api/admin/report-settings','POST',body);
+  $('reportTokenInfo').textContent='Сохранённый токен: '+(data.token_mask||'—')+(data.updated?' · обновлён '+data.updated:'');
+  $('reportToken').value='';
+}
+async function testReport(){
+  const text=$('reportTestText').value.trim()||'✅ Тестовый отчёт от QuizBot';
+  await req('/api/admin/report-test','POST',{text});
+}
+loadSettings();
+</script>
+</body>
+</html>
