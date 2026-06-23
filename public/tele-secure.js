@@ -1,7 +1,3 @@
-// tele-secure.js
-// Отчёты отправляются через Cloudflare Worker.
-// Telegram bot token и chat ID НЕ должны храниться в этом файле.
-
 (function () {
   "use strict";
 
