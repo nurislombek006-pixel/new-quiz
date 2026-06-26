@@ -20,6 +20,11 @@
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 4px 8px}
     .menu-toggle{width:50px;height:50px;border-radius:16px;border:1px solid rgba(255,255,255,.38);background:rgba(255,255,255,.88);color:#1f2937;font-size:27px;font-weight:1000;cursor:pointer;box-shadow:0 10px 24px rgba(17,24,39,.16)}
     .chip{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:rgba(255,255,255,.18);color:#fff;border-radius:999px;min-height:34px;padding:7px 12px;font-size:13px;font-weight:1000;backdrop-filter:blur(10px)}
+    .subject-switch-wrap{position:relative;min-width:135px;max-width:210px;flex:0 1 210px}
+    .subject-select{width:100%;height:50px;border:1px solid rgba(255,255,255,.30);background:rgba(15,23,42,.50);color:#fff;border-radius:999px;padding:0 34px 0 16px;font-size:14px;font-weight:1000;outline:0;appearance:none;-webkit-appearance:none;box-shadow:0 10px 24px rgba(17,24,39,.14);backdrop-filter:blur(10px)}
+    .subject-switch-wrap:after{content:'⌄';position:absolute;right:14px;top:50%;transform:translateY(-55%);font-size:21px;font-weight:1000;color:#fff;pointer-events:none;opacity:.92}
+    body.light .subject-select{background:rgba(255,255,255,.88);color:#111827;border-color:rgba(226,232,240,.85)}
+    body.light .subject-switch-wrap:after{color:#64748b}
     .icon-btn{border:1px solid rgba(255,255,255,.28);background:rgba(15,23,42,.55);color:#fff;border-radius:15px;min-width:44px;min-height:44px;font-weight:1000;cursor:pointer;box-shadow:0 6px 15px rgba(0,0,0,.14)}
     .top-right{display:flex;align-items:center;gap:8px}
     /* Premium badge */
@@ -354,7 +359,11 @@ setTimeout(function(){
 <div class="app">
   <div class="topbar">
     <button id="menu-toggle" class="menu-toggle" onclick="toggleDrawer()">☰</button>
-    <span class="chip">📚 Макро</span>
+    <div class="subject-switch-wrap">
+      <select id="subject-select" class="subject-select" onchange="switchSubject(this.value)">
+        <option value="macro">📚 Маркетинг</option>
+      </select>
+    </div>
     <div class="top-right">
       <span id="premium-badge" class="premium-badge hidden"></span>
       <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
@@ -945,37 +954,83 @@ function hideAccessLoader(){document.getElementById('auth-loading').classList.ad
 /* ════════════════════════════════════════════════
    TEST LOGIC
 ════════════════════════════════════════════════ */
-function getPrimarySubjectEntry(data){
-  const subs=data?.subjects||{};
-  if(subs.macro)return ['macro',subs.macro];
-  const first=Object.entries(subs)[0];
-  return first||['macro',{title:'Макроэкономика',short:'Макро',emoji:'📚',tests:Array.isArray(data)?data:[]}];
+function cleanSubjectKey(key){return String(key||'macro').replace(/[^a-zA-Z0-9а-яА-ЯёЁ_-]/g,'_')||'macro'}
+function getSubjectEntries(data){
+  const subs=(data?.subjects)||subjects||{};
+  const entries=Object.entries(subs).filter(([,sub])=>sub&&typeof sub==='object');
+  if(entries.length)return entries;
+  return [['macro',{title:'Маркетинг',short:'Маркетинг',emoji:'📚',tests:Array.isArray(data)?data:[]}]];
 }
-function getSubjectTitle(){return window.currentSubjectTitle||'Макроэкономика'}
+function getSavedSubjectKey(){return localStorage.getItem('quizbot_subject_key_v1')||''}
+function getPrimarySubjectEntry(data){
+  const entries=getSubjectEntries(data);
+  const saved=getSavedSubjectKey();
+  if(saved){const found=entries.find(([k])=>String(k)===String(saved));if(found)return found;}
+  const current=window.currentSubjectKey;
+  if(current){const found=entries.find(([k])=>String(k)===String(current));if(found)return found;}
+  return entries.find(([k])=>k==='macro')||entries[0];
+}
+function getSubjectTitle(){return window.currentSubjectTitle||'Маркетинг'}
 function getSubjectShort(){return window.currentSubjectShort||getSubjectTitle()}
 function getSubjectEmoji(){return window.currentSubjectEmoji||'📚'}
-function applySubjectMeta(data){
-  const [key,sub]=getPrimarySubjectEntry(data||{});
-  const title=sub?.title||sub?.name||'Макроэкономика';
+function fillSubjectSelect(){
+  const sel=document.getElementById('subject-select');if(!sel)return;
+  const entries=getSubjectEntries({subjects});
+  sel.innerHTML=entries.map(([key,sub])=>{
+    const title=sub?.short||sub?.title||sub?.name||key;
+    const emoji=sub?.emoji||'📚';
+    return `<option value="${escapeHtml(key)}">${escapeHtml(emoji+' '+title)}</option>`;
+  }).join('');
+  sel.value=window.currentSubjectKey||entries[0]?.[0]||'macro';
+  sel.disabled=entries.length<2;
+}
+function setCurrentSubject(key,opts={}){
+  const entries=getSubjectEntries({subjects});
+  let pair=entries.find(([k])=>String(k)===String(key));
+  if(!pair)pair=entries.find(([k])=>k==='macro')||entries[0]||['macro',{title:'Маркетинг',short:'Маркетинг',emoji:'📚',tests:[]}];
+  const [realKey,sub]=pair;
+  const title=sub?.title||sub?.name||realKey||'Маркетинг';
   const short=sub?.short||title;
   const emoji=sub?.emoji||'📚';
-  window.currentSubjectKey=key;window.currentSubjectTitle=title;window.currentSubjectShort=short;window.currentSubjectEmoji=emoji;
-  document.title='Economy Pro · '+title;
+  window.currentSubjectKey=realKey;window.currentSubjectTitle=title;window.currentSubjectShort=short;window.currentSubjectEmoji=emoji;
+  localStorage.setItem('quizbot_subject_key_v1',realKey);
+  database=normalizeTests({subjects});
+  document.title='QuizBot · '+title;
   document.querySelectorAll('.splash-sub').forEach(el=>el.textContent=title);
   document.querySelectorAll('.welcome-subject').forEach(el=>el.textContent=title);
-  document.querySelectorAll('.chip').forEach(el=>{if(el.textContent.includes('Макро')||el.textContent.includes('Маркет'))el.textContent=emoji+' '+short;});
   const meta=document.getElementById('test-meta');if(meta)meta.textContent=title;
+  const total=document.getElementById('total-count');if(total)total.innerText=database.length;
+  fillSubjectSelect();
+  updateProgressUI?.();
+  if(!opts.keepSession){clearActiveSession?.();document.getElementById('resume-card')?.classList.add('hidden');}
+}
+function switchSubject(key){
+  if(String(key)===String(window.currentSubjectKey))return;
+  setCurrentSubject(key,{keepSession:false});
+  showConfigError('Предмет изменён: '+getSubjectTitle()+'. Можно начинать тест.');
+  setTimeout(hideConfigError,1800);
+}
+function applySubjectMeta(data){
+  subjects=data?.subjects||subjects||{};
+  const [key]=getPrimarySubjectEntry({subjects});
+  setCurrentSubject(key,{keepSession:true});
 }
 function normalizeTests(data){
   let tests=[];
   if(Array.isArray(data))tests=data;
-  else{const [,sub]=getPrimarySubjectEntry(data);tests=Array.isArray(sub?.tests)?sub.tests:[];}
-  return tests.map((q,i)=>({...q,num:i+1,id:q.id||'q-'+(i+1),answer:Number(q.answer)||0,generated:!!q.generated,options:q.options||[]}));
+  else{
+    const subs=data?.subjects||subjects||{};
+    const key=window.currentSubjectKey || getPrimarySubjectEntry({subjects:subs})?.[0] || 'macro';
+    const sub=subs[key] || getPrimarySubjectEntry({subjects:subs})?.[1] || {};
+    tests=Array.isArray(sub?.tests)?sub.tests:[];
+  }
+  const sk=cleanSubjectKey(window.currentSubjectKey||'macro');
+  return tests.map((q,i)=>({...q,num:i+1,id:q.id||`${sk}-q-${i+1}`,answer:Number(q.answer)||0,generated:!!q.generated,options:q.options||[]}));
 }
 async function loadTests(){
   const data=await fetchJsonSafe(apiUrl('/api/tests'),null,5000,60000);
   if(!data)throw new Error('База вопросов не загрузилась из backend API');
-  subjects=data.subjects||{};applySubjectMeta(data);database=normalizeTests(data);
+  subjects=data.subjects||{};applySubjectMeta(data);
   document.getElementById('total-count').innerText=database.length;
   updateProgressUI();
 }
@@ -1127,7 +1182,7 @@ function toggleReview(){lastReviewVisible=!lastReviewVisible;document.getElement
 function isFav(q){return getFavorites().some(f=>getQuestionId(f)===getQuestionId(q))}
 function toggleFav(q){let fav=getFavorites();if(isFav(q))fav=fav.filter(f=>getQuestionId(f)!==getQuestionId(q));else fav.push(q);setFavorites(fav)}
 function toggleCurrentFavorite(){if(sessionQuestions[currentIdx]){toggleFav(sessionQuestions[currentIdx]);renderQuestion()}}
-function favKey(){return 'fav_questions_v9_macro'}function histKey(){return 'test_history_v9_macro'}function solvedKey(){return 'solved_questions_v9_macro'}function mistakesKey(){return 'mistake_questions_v9_macro'}function activeSessionKey(){return 'active_session_v9_macro'}
+function storageSubjectKey(){return cleanSubjectKey(window.currentSubjectKey||'macro')}function favKey(){return 'fav_questions_v10_'+storageSubjectKey()}function histKey(){return 'test_history_v10_'+storageSubjectKey()}function solvedKey(){return 'solved_questions_v10_'+storageSubjectKey()}function mistakesKey(){return 'mistake_questions_v10_'+storageSubjectKey()}function activeSessionKey(){return 'active_session_v10_'+storageSubjectKey()}
 function getArr(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return[]}}function setArr(k,v){localStorage.setItem(k,JSON.stringify([...new Set(v)]))}
 function getFavorites(){return getArr(favKey())}function setFavorites(v){localStorage.setItem(favKey(),JSON.stringify(v))}
 function getHistory(){return getArr(histKey())}function setHistory(v){localStorage.setItem(histKey(),JSON.stringify(v))}
