@@ -181,9 +181,19 @@ async function initializeEmbeddedAdmin(){
     const response=await fetch('/api/admin/me',{
       headers:{'X-Telegram-Init-Data':initData},cache:'no-store',credentials:'same-origin'
     });
-    if(!response.ok){deny('Этот Telegram-аккаунт не имеет доступа к панели управления.');return;}
-    const result=await response.json();
-    if(!result?.admin){deny('Доступ запрещён.');return;}
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok){
+      const code=String(result.code||'');
+      const messages={
+        TELEGRAM_BOT_NOT_CONFIGURED:'На Netlify не настроен токен Mini App. Проверьте переменную APP_BOT_TOKEN.',
+        TELEGRAM_SIGNATURE_INVALID:'Токен Mini App на Netlify не соответствует боту или Telegram-сессия устарела. Проверьте APP_BOT_TOKEN и откройте приложение заново.',
+        TELEGRAM_SESSION_MISSING:'Telegram не передал данные входа. Откройте Mini App из бота.',
+        NOT_ADMIN_OWNER:'Этот Telegram-аккаунт не является владельцем.'
+      };
+      deny(messages[code]||'Не удалось подтвердить вход в Netlify (HTTP '+response.status+').');
+      return;
+    }
+    if(!result?.admin){deny('Сервер не подтвердил доступ.');return;}
     document.body.classList.add('admin-embedded');
     document.documentElement.classList.remove('admin-embed-pending');
     await refreshAll();
