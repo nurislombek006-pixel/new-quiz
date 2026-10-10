@@ -61,7 +61,7 @@ function launchAs(id,serverAllows=false){
     setInterval(fn){timers.push(fn);return timers.length},clearInterval(){},
     fetch:async(url,options)=>{
       calls.push({url,options});
-      return {ok:serverAllows,json:async()=>serverAllows?{ok:true,admin:true}:{ok:false,admin:false}};
+      return {ok:serverAllows,status:serverAllows?200:403,json:async()=>serverAllows?{ok:true,admin:true}:{ok:false,admin:false}};
     },
     MutationObserver:undefined
   };
