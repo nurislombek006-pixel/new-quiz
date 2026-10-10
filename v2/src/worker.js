@@ -1,3 +1,4 @@
+import {currentToken, getBotStatus, rotateBotToken} from './bot-config.js';
 // v2: Cloudflare Worker + D1. No trust in client-provided Telegram IDs.
 const H = {'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'};
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:H});
@@ -72,7 +73,10 @@ async function webhook(req,env){
 }
 const secure=(x)=>String(x||'').slice(0,4000);
 async function route(req,env){
-  if(!env.DB||!env.BOT_TOKEN)return fail('Не настроены база D1 или токен бота',503);
+  if(!env.DB)return fail('Не настроена база D1',503);
+  const token=await currentToken(env);
+  if(!token)return fail('Токен бота ещё не настроен в Cloudflare Secrets',503);
+  env={...env,BOT_TOKEN:token};
   const url=new URL(req.url),path=url.pathname;
   if(path==='/api/telegram-webhook'&&req.method==='POST')return webhook(req,env);
   if(path==='/api/health')return json({ok:true,service:'new-quiz-v2'});
@@ -107,6 +111,13 @@ async function route(req,env){
     return json({ok:true,questions:r.results.map(q=>({...q,options:JSON.parse(q.options)})),limit:max});
   }
   if(!admin)return fail('Только владелец',403);
+  if(path==='/api/admin/bot'&&req.method==='GET')return json({ok:true,bot:await getBotStatus(env)});
+  if(path==='/api/admin/bot'&&req.method==='POST'){
+    const data=await body(req,3000);
+    const bot=await rotateBotToken(env,data.token);
+    await audit(env.DB,user.id,'rotate_bot',String(bot.id),{username:bot.username});
+    return json({ok:true,bot,reopen:true});
+  }
   if(path==='/api/admin/users'&&req.method==='GET'){
     const offset=Math.min(100000,Math.max(0,Number(url.searchParams.get('offset'))||0));
     const q=(url.searchParams.get('q')||'').trim().slice(0,60);
