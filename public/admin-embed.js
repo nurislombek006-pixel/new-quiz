@@ -12,7 +12,6 @@
   let checkedData='';
   let observer=null;
   let nextCheckAt=0;
-  let failureCount=0;
 
   function telegramApp(){
     try{return window.Telegram?.WebApp||null}
