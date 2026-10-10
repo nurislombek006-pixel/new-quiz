@@ -75,9 +75,9 @@ test('Regular UI no longer shows mistake/progress counters',()=>{
   assert.doesNotMatch(website,/id="mistakes-count"/);
   assert.doesNotMatch(website,/id="study-progress-chip"/);
   assert.doesNotMatch(website,/id="study-progress-text"/);
-  assert.match(website,/admin-embed\.js\?v=3/);
+  assert.match(website,/admin-embed\.js\?v=4/);
   assert.match(embeddedScript,/OWNER_ID='5305261101'/);
-  assert.match(embeddedScript,/async function checkOwner\(\)/);
+  assert.match(embeddedScript,/async function checkOwner\(force=false\)/);
   assert.match(embeddedScript,/if\(!authorized\)return/);
   assert.match(embeddedScript,/response\.ok&&result\?\.ok===true&&result\?\.admin===true/);
   assert.match(embeddedScript,/\.subject-switch-wrap/);

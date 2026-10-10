@@ -9,7 +9,7 @@ const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function launchAs(id,serverAllows=false){
   const root=[];
   function node(tag){
-    const obj={tag,id:'',className:'',textContent:'',children:[],attributes:{},listeners:{},
+    const obj={tag,id:'',className:'',textContent:'',children:[],attributes:{},listeners:{},style:{},
       append(...parts){this.children.push(...parts)},
       appendChild(part){this.children.push(part)},
       setAttribute(name,value){this.attributes[name]=value},
@@ -61,7 +61,7 @@ function launchAs(id,serverAllows=false){
     setInterval(fn){timers.push(fn);return timers.length},clearInterval(){},
     fetch:async(url,options)=>{
       calls.push({url,options});
-      return {ok:serverAllows,json:async()=>serverAllows?{ok:true,admin:true}:{ok:false,admin:false}};
+      return {ok:serverAllows,status:serverAllows?200:403,json:async()=>serverAllows?{ok:true,admin:true}:{ok:false,admin:false}};
     },
     MutationObserver:undefined
   };
@@ -84,6 +84,16 @@ test('Owner sees admin button only AFTER signed server permission',async()=>{
   assert.equal(instance.document.body.classList.contains('owner-admin-active'),true);
 });
 
+test('Owner sees a safe diagnostic instead of admin UI when Netlify rejects login',async()=>{
+  const instance=launchAs(5305261101,false);
+  await tick();
+  const diag=instance.document.getElementById('owner-auth-diagnostic');
+  assert.ok(diag,'Owner must see access troubleshooting diagnostics');
+  assert.match(instance.document.getElementById('owner-auth-error-text').textContent,/HTTP_403/);
+  assert.equal(instance.document.getElementById('owner-admin-link'),null);
+  assert.equal(instance.document.getElementById('admin-screen'),null);
+});
+
 test('Even forged client-side owner ID never exposes admin when server rejects',async()=>{
   const instance=launchAs(5305261101,false);
   await tick();
@@ -97,6 +107,7 @@ test('Normal user sees regular unchanged drawer, even with a hypothetically perm
   await tick();
   assert.equal(instance.document.getElementById('owner-admin-link'),null);
   assert.equal(instance.document.getElementById('admin-screen'),null);
+  assert.equal(instance.document.getElementById('owner-auth-diagnostic'),null);
   assert.equal(instance.calls.length,0);
 });
 
