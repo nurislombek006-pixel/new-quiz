@@ -30,7 +30,7 @@ function routeAdmin(section){
   activeSection=section;
   document.querySelectorAll('.admin-section').forEach(el=>el.classList.toggle('active',el.id==='admin-'+section));
   document.querySelectorAll('.subnav-button').forEach(el=>el.classList.toggle('active',el.dataset.section===section));
-  if(section==='users')refreshUsers(true);if(section==='content')refreshSubjects();
+  if(section==='users')refreshUsers(true);if(section==='content')refreshSubjects();if(section==='bot')refreshBotStatus();
 }
 function showSession(x){
   session=x;
@@ -225,6 +225,38 @@ function nextQuestion(){
   }
   showQuestion();
 }
+async function refreshBotStatus(){
+  if(!session?.admin)return;
+  text('bot-status','Проверяю подключение к Telegram…');
+  try{
+    const data=await api('/api/admin/bot');
+    const bot=data.bot||{};
+    text('bot-status',!bot.configured?'Бот пока не настроен':bot.reachable
+      ?'Подключён: '+(bot.username?'@'+bot.username:'Telegram bot #'+bot.id)
+      :'Токен сохранён, но Telegram API не отвечает. Проверьте его в настройках.');
+  }catch(e){text('bot-status','Не удалось проверить: '+humanError(e))}
+}
+async function changeBotToken(){
+  if(!session?.admin)return;
+  const input=$('bot-token'),newToken=input.value.trim();
+  if(!/^\d{6,15}:[A-Za-z0-9_-]{25,}$/.test(newToken)){
+    toast('Введите токен Telegram-бота от BotFather');return;
+  }
+  if(!window.confirm('Заменить действующий токен бота? Старые сообщения и кнопки старого бота могут перестать работать после переключения.'))return;
+  const btn=$('bot-change');
+  btn.disabled=true;
+  input.value=''; // Never keep or persist the token in the browser after sending.
+  text('bot-result','Проверяем токен и обновляем Telegram webhook…');
+  try{
+    const x=await api('/api/admin/bot','POST',{token:newToken});
+    text('bot-status','✅ Подключён: @'+(x.bot?.username||'Telegram bot'));
+    text('bot-result','Готово! Новый бот подключён. Закройте Mini App, откройте указанного бота и нажмите /start, чтобы войти с новыми данными авторизации.');
+    toast('Бот подключён ✓');
+  }catch(e){
+    text('bot-result','Не удалось обновить: '+humanError(e));
+    toast('Ошибка смены токена');
+  }finally{btn.disabled=false}
+}
 async function boot(){
   document.querySelectorAll('[data-page]').forEach(el=>el.onclick=()=>routePage(el.dataset.page));
   document.querySelectorAll('[data-section]').forEach(el=>el.onclick=()=>routeAdmin(el.dataset.section));
@@ -235,6 +267,8 @@ async function boot(){
   $('users-search').addEventListener('keydown',e=>{if(e.key==='Enter')$('users-find').click()});
   $('users-more').onclick=()=>refreshUsers(false);
   $('admin-refresh').onclick=refreshAdmin;
+  $('bot-refresh').onclick=refreshBotStatus;
+  $('bot-change').onclick=changeBotToken;
   document.querySelectorAll('[data-access]').forEach(el=>el.onclick=()=>accessChange(el.dataset.access));
   $('subject-save').onclick=()=>saveSubject(false);$('subject-delete').onclick=()=>saveSubject(true);
   $('import-file').onchange=e=>loadDocument(e.target.files?.[0]);
