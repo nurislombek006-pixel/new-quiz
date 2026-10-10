@@ -189,3 +189,5 @@ export default {
     try{return await route(req,env);}catch(e){console.error('API',e);return fail(e?.message||'Внутренняя ошибка',500);}
   }
 };
+
+export {auth};
