@@ -10,7 +10,7 @@ run_worker_first = ["/api/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "new-quiz-v2"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "dd5789c4-01f4-4e3b-8617-f4c785a76256"
 
 # Secrets MUST be set through "wrangler secret put":
 # BOT_TOKEN, OWNER_TG_ID, WEBHOOK_SECRET, PUBLIC_URL, BOT_TOKEN_ENCRYPTION_KEY
