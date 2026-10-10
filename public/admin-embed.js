@@ -11,6 +11,8 @@
   let checking=false;
   let checkedData='';
   let observer=null;
+  let nextCheckAt=0;
+  let failureCount=0;
 
   function telegramApp(){
     try{return window.Telegram?.WebApp||null}
@@ -29,6 +31,56 @@
       const user=new URLSearchParams(app?.initData||'').get('user');
       return user?String(JSON.parse(user).id||''):'';
     }catch{return ''}
+  }
+
+  // This is a troubleshooting notice, NOT an admin menu. It never grants access.
+  // It is displayed only if Telegram's local identity hint matches the owner;
+  // Netlify's signed verification is still mandatory for admin permissions.
+  function describeAuthError(code){
+    const reasons={
+      TELEGRAM_SESSION_MISSING:'Telegram не передал данные входа. Откройте Mini App кнопкой бота.',
+      TELEGRAM_BOT_NOT_CONFIGURED:'В Netlify не настроен токен бота для Mini App.',
+      TELEGRAM_SIGNATURE_INVALID:'Netlify не смог подтвердить подпись Telegram. Возможно, APP_BOT_TOKEN не совпадает с ботом, открывающим приложение.',
+      NOT_ADMIN_OWNER:'Сервер подтвердил другого Telegram-пользователя.',
+      HTTP_404:'Netlify не нашёл серверный маршрут /api/admin/me.',
+      HTTP_502:'Netlify не смог выполнить серверную функцию.',
+      HTTP_503:'Серверная функция временно недоступна.',
+      NETWORK_ERROR:'Не удалось связаться с Netlify. Проверьте подключение.',
+      INVALID_RESPONSE:'Сервер вернул ответ неверного формата.',
+      INITDATA_EMPTY:'У Mini App нет подписанных данных Telegram. Откройте приложение кнопкой бота.'
+    };
+    return reasons[code]||'Проверка Telegram-авторизации на Netlify не прошла.';
+  }
+  function clearDiagnostic(){
+    document.getElementById('owner-auth-diagnostic')?.remove();
+  }
+  function showDiagnostic(code){
+    if(authorized||displayId()!==OWNER_ID)return;
+    const drawer=document.querySelector('#side-drawer .drawer-list');
+    if(!drawer)return;
+    let notice=document.getElementById('owner-auth-diagnostic');
+    if(!notice){
+      notice=document.createElement('div');
+      notice.id='owner-auth-diagnostic';
+      notice.className='drawer-section';
+      notice.style.cssText='border:1px solid rgba(251,191,36,.3);border-radius:15px;padding:12px;margin-top:14px;background:rgba(120,53,15,.12)';
+      const heading=document.createElement('div');
+      heading.className='drawer-section-title';
+      heading.textContent='ПРОВЕРКА ДОСТУПА';
+      const explanation=document.createElement('div');
+      explanation.id='owner-auth-error-text';
+      explanation.style.cssText='font-size:12px;line-height:1.6;opacity:.9;overflow-wrap:anywhere;margin:9px 0';
+      const retry=document.createElement('button');
+      retry.type='button';
+      retry.className='drawer-item';
+      retry.style.cssText='font-size:13px;min-height:42px;width:100%;cursor:pointer';
+      retry.textContent='↻ Проверить ещё раз';
+      retry.addEventListener('click',()=>checkOwner(true));
+      notice.append(heading,explanation,retry);
+      drawer.appendChild(notice);
+    }
+    const message=document.getElementById('owner-auth-error-text');
+    if(message)message.textContent=describeAuthError(code)+' Код: '+String(code||'UNKNOWN').slice(0,48);
   }
 
   function hideSubjectOnAdmin(){
@@ -99,6 +151,7 @@
 
   function insertMenu(){
     if(!authorized)return;
+    clearDiagnostic();
     makeScreen();
     const drawer=document.querySelector('#side-drawer .drawer-list');
     if(!drawer)return;
@@ -138,15 +191,23 @@
     installed=false;
   }
 
-  async function checkOwner(){
+  async function checkOwner(force=false){
     if(checking)return;
     const initData=telegramInitData();
-    if(!initData||displayId()!==OWNER_ID){
+    const id=displayId();
+    if(id!==OWNER_ID){
       if(authorized)removeMenu();
+      clearDiagnostic();
+      return;
+    }
+    if(!initData){
+      showDiagnostic('INITDATA_EMPTY');
       return;
     }
     if(authorized&&checkedData===initData){if(!installed)insertMenu();return}
+    if(!force&&Date.now()<nextCheckAt)return;
     checking=true;
+    nextCheckAt=Date.now()+5000;
     try{
       const response=await fetch(AUTH_ENDPOINT,{
         method:'GET',
@@ -158,15 +219,18 @@
       if(!allowed){
         checkedData='';
         if(authorized)removeMenu();
-        // Never reveal the admin navigation on failed authorization, even if
-        // initDataUnsafe says the ID belongs to the owner.
+        const code=String(result?.code||('HTTP_'+response.status));
+        showDiagnostic(code);
+        // This diagnostic does not reveal admin controls or accept client IDs.
         return;
       }
       checkedData=initData;
       authorized=true;
+      clearDiagnostic();
       insertMenu();
     }catch(e){
       if(authorized)removeMenu();
+      showDiagnostic('NETWORK_ERROR');
       console.warn('Owner authorization check unavailable');
     }finally{checking=false}
   }
