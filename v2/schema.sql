@@ -36,3 +36,10 @@ CREATE TABLE IF NOT EXISTS audit_log (
  details TEXT NOT NULL DEFAULT '{}',
  created_at INTEGER NOT NULL
 );
+
+-- Bot token ciphertext is AES-GCM-encrypted with the server-only BOT_TOKEN_ENCRYPTION_KEY.
+CREATE TABLE IF NOT EXISTS bot_settings (
+ id INTEGER PRIMARY KEY CHECK (id = 1),
+ ciphertext TEXT NOT NULL,
+ updated_at INTEGER NOT NULL
+);
