@@ -55,3 +55,8 @@ footer{padding:23px 0 28px;text-align:center;color:#6f809b;font-size:11px}
 .hidden{display:none!important}
 @media(max-width:520px){.shell{width:min(100% - 22px,860px)}.header{padding-top:15px}.brand strong{font-size:16px}.brand small{font-size:9px}.header-end{font-size:10px}.navigation{margin-bottom:20px}.nav-button{font-size:11px;padding:5px 2px}.hero{padding:29px 21px}.hero:after{opacity:.25}.panel{padding:16px}.tiles{gap:7px}.tile{padding:13px 10px}.tile span{font-size:10px}.tile strong{font-size:20px}.section-top h1{font-size:25px}.two{grid-template-columns:1fr}.buttons{flex-direction:column}.buttons .button{width:100%}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+.notice-like{background:#273c5a6b;border:1px solid #607baf70;border-radius:14px;padding:13px 15px;color:#d8e8ff;font-size:12px;line-height:1.6}
+#bot-status{font-weight:750;color:#c4d3f5}
+#bot-result{line-height:1.6}
+#bot-token{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;letter-spacing:.1px}
