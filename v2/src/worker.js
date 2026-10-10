@@ -80,8 +80,23 @@ async function route(req,env,ctx){
   const url=new URL(req.url),path=url.pathname;
   if(path==='/api/telegram-webhook'&&req.method==='POST')return webhook(req,env);
   if(path==='/api/health')return json({ok:true,service:'new-quiz-v2'});
+  if(path==='/api/bot'&&req.method==='GET')return json({ok:true,bot:await getBotStatus(env)});
   const user=await auth(req,env);
-  if(!user)return fail('Откройте приложение через Telegram',401);
+  if(!user){
+    // Public site is browseable without Telegram, with a limited demo only.
+    // Admin rights and full quizzes still require signed Telegram initData.
+    if(req.headers.get('X-Telegram-Init-Data'))return fail('Некорректная авторизация Telegram',401);
+    if(path==='/api/session'&&req.method==='GET')return json({ok:true,guest:true,admin:false,user:{first_name:'Гость',username:'',premium_until:0,is_banned:0,version:0}});
+    if(path==='/api/subjects'&&req.method==='GET'){
+      const r=await env.DB.prepare("SELECT s.id,s.title,COUNT(q.id) AS count FROM subjects s LEFT JOIN questions q ON q.subject_id=s.id WHERE s.id='demo' GROUP BY s.id").all();
+      return json({ok:true,subjects:r.results});
+    }
+    if(path==='/api/questions'&&req.method==='GET'&&url.searchParams.get('subject')==='demo'){
+      const r=await env.DB.prepare("SELECT id,topic,text,options,correct_index FROM questions WHERE subject_id='demo' ORDER BY RANDOM() LIMIT 10").all();
+      return json({ok:true,questions:r.results.map(q=>({...q,options:JSON.parse(q.options)})),limit:10,guest:true});
+    }
+    return fail('Откройте приложение через Telegram',401);
+  }
   const admin=user.id===String(env.OWNER_TG_ID||'');
   if(path==='/api/session'&&req.method==='GET'){
     await touch(env.DB,user);
