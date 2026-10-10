@@ -48,7 +48,7 @@
     <section id="page-admin" class="page">
       <div class="section-top"><div><span class="eyebrow">ТОЛЬКО ДЛЯ ВЛАДЕЛЬЦА</span><h1>Панель управления</h1><p class="muted">Изменения применяются сразу после подтверждения.</p></div><button id="admin-refresh" class="button subtle">↻</button></div>
       <div class="tiles stats"><div class="tile"><span>👥 Пользователи</span><strong id="stat-users">—</strong></div><div class="tile"><span>🟢 Онлайн в приложении</span><strong id="stat-online">—</strong></div><div class="tile"><span>👑 Premium</span><strong id="stat-premium">—</strong></div></div>
-      <div class="subnav"><button class="subnav-button active" data-section="users">Пользователи</button><button class="subnav-button" data-section="access">Доступ</button><button class="subnav-button" data-section="content">Вопросы и темы</button></div>
+      <div class="subnav"><button class="subnav-button active" data-section="users">Пользователи</button><button class="subnav-button" data-section="access">Доступ</button><button class="subnav-button" data-section="content">Вопросы и темы</button><button class="subnav-button" data-section="bot">🤖 Бот</button></div>
       <div id="admin-users" class="admin-section active">
         <div class="panel stack">
           <div class="panel-heading"><h2>Последняя активность</h2><span class="live"><i></i> Обновляется</span></div>
@@ -65,6 +65,19 @@
           <label class="field">Причина блокировки<input id="ban-reason" placeholder="Нарушение правил"></label>
           <div class="buttons"><button class="button danger" data-access="ban">🚫 Заблокировать</button><button class="button subtle" data-access="unban">Разблокировать</button></div>
           <p id="access-result" class="small muted"></p>
+        </div>
+      </div>
+      <div id="admin-bot" class="admin-section">
+        <div class="panel stack">
+          <div class="panel-heading"><h2>🤖 Настройки Telegram-бота</h2><button id="bot-refresh" class="button subtle">↻ Проверить</button></div>
+          <p id="bot-status" class="small muted">Загрузка статуса бота…</p>
+          <div class="notice-like">🔒 Только владелец может заменить токен. Новый токен шифруется на сервере, не отображается после сохранения и не попадает в исходный код GitHub.</div>
+          <label class="field">Новый токен от @BotFather
+            <input id="bot-token" type="password" placeholder="Вставьте новый токен" autocomplete="new-password" autocapitalize="off" spellcheck="false">
+          </label>
+          <div class="buttons"><button id="bot-change" class="button primary">🔄 Сменить токен и переподключить бота</button></div>
+          <p class="small muted">Перед сохранением сервер проверит новый токен через Telegram, затем автоматически установит webhook. После успешной смены откройте приложение заново через нужного бота. Если вы переходите на другого бота, пользователям потребуется открыть его самостоятельно.</p>
+          <p id="bot-result" class="small muted" role="status"></p>
         </div>
       </div>
       <div id="admin-content" class="admin-section">
