@@ -10,7 +10,7 @@ function readableTime(t){if(!t)return 'Нет активности';const diff=M
 function humanError(e){return String(e.message||e)}
 async function api(path,method='GET',data){
   const initData=tg?.initData||'';
-  if(!initData)throw Error('Откройте приложение кнопкой из Telegram-бота.');
+  if(!initData&&!(method==='GET'&&(/^\/api\/(session|subjects|bot)$/.test(path)||path.startsWith('/api/questions?'))))throw Error('Откройте приложение через Telegram-бота.');
   const opt={method,headers:{'X-Telegram-Init-Data':initData},cache:'no-store'};
   if(data!==undefined){opt.headers['Content-Type']='application/json';opt.body=JSON.stringify(data)}
   const response=await fetch(path,opt);let res;
@@ -40,12 +40,14 @@ function showSession(x){
   $('prem-badge').classList.toggle('hidden',!premium);
   text('home-premium',premium?'Premium':'Обычный');
   $('admin-nav').classList.toggle('hidden',!x.admin);
-  $('online-status').classList.add('live');
+  $('online-status').classList.toggle('live',!x.guest);
+  $('guest-hint').classList.toggle('hidden',!x.guest);
+  if(x.guest){api('/api/bot').then(r=>{const username=r.bot?.username||'';if(/^[A-Za-z0-9_]{5,32}$/.test(username)){const a=$('telegram-link');a.href='https://t.me/'+username+'?start=quiz';a.classList.remove('hidden')}}).catch(console.warn)}
   if(user.is_banned&&!x.admin)showNotice('Вы заблокированы: '+(user.ban_reason||'Обратитесь к администратору'));
   else showNotice('');
 }
 async function refreshState(){
-  if(!session||document.hidden)return;
+  if(!session||session.guest||document.hidden)return;
   try{
     const x=await api('/api/state');lastStateAt=Date.now();
     if(session.user.version!==x.user.version||session.user.is_banned!==x.user.is_banned||session.user.premium_until!==x.user.premium_until){
@@ -54,7 +56,7 @@ async function refreshState(){
   }catch(e){if(/блокир|Forbidden|403/.test(humanError(e)))showNotice(humanError(e));}
 }
 async function ping(){
-  if(!session||document.hidden)return;
+  if(!session||session.guest||document.hidden)return;
   try{
     const x=await api('/api/ping','POST');
     if(x.banned&&!session.admin){showNotice('Ваш аккаунт заблокирован.');}
