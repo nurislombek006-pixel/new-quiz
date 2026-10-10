@@ -72,20 +72,27 @@ async function hmacSign(keyBytes, data){
 }
 async function verifyTelegramInitData(initData, botToken){
   try{
-    if(!initData || !botToken)return null;
+    if(!initData || !botToken || String(initData).length > 8192)return null;
     const params = new URLSearchParams(initData);
     const givenHash = params.get('hash') || '';
-    if(!givenHash)return null;
+    if(!/^[0-9a-f]{64}$/i.test(givenHash))return null;
+    const authDate = Number(params.get('auth_date'));
+    const now = Math.floor(Date.now() / 1000);
+    if(!Number.isSafeInteger(authDate) || authDate <= 0 || Math.abs(now - authDate) > 86400)return null;
     params.delete('hash');
+    params.delete('signature');
     const checkString = Array.from(params.entries())
       .sort(([a],[b])=>a.localeCompare(b))
-      .map(([k,v])=>`${k}=${v}`)
-      .join('\\n');
+      .map(([k,v])=>k+'='+v)
+      .join('\n');
     const secretKey = await hmacSign(textEncoder().encode('WebAppData'), botToken);
     const calcHash = hex(await hmacSign(secretKey, checkString));
-    if(!sameText(calcHash, givenHash))return null;
+    if(!sameText(calcHash, givenHash.toLowerCase()))return null;
     const userRaw = params.get('user');
-    return userRaw ? JSON.parse(userRaw) : {};
+    if(!userRaw)return null;
+    const user = JSON.parse(userRaw);
+    if(!user || !/^[1-9][0-9]{0,18}$/.test(String(user.id || '')))return null;
+    return user;
   }catch(e){ return null; }
 }
 
@@ -409,13 +416,14 @@ function rateOk(request, id, env){
   if(RATE_BUCKETS.size > 10000) RATE_BUCKETS.clear();
   return item.count <= limit;
 }
-function adminSecretOk(request, env){
-  const url = new URL(request.url);
-  const provided = request.headers.get('X-Admin-Secret') || url.searchParams.get('key') || '';
-  const expected = env.ADMIN_SECRET || env.ADMIN_KEY || '';
-  if(!expected) return {ok:false, status:500, message:'ADMIN_SECRET не задан в Cloudflare Variables/Secrets'};
-  if(!provided || !sameText(hexString(provided), hexString(expected))){
-    return {ok:false, status:403, message:'Неверный ADMIN_SECRET'};
+// Only the Telegram account owner can use admin endpoints.
+// Netlify remains the backend: verify initData with the Mini App bot's server-side token.
+const ADMIN_OWNER_TELEGRAM_ID = '5305261101';
+async function adminOwnerOk(request, env){
+  const initData = request.headers.get('X-Telegram-Init-Data') || '';
+  const user = await verifyTelegramInitData(initData, getAppBotToken(env));
+  if(!user || String(user.id) !== ADMIN_OWNER_TELEGRAM_ID){
+    return {ok:false,status:403,message:'Админка доступна только владельцу в Telegram Mini App'};
   }
   return {ok:true};
 }
@@ -433,8 +441,9 @@ async function readAdminBody(request){
 }
 async function handleAdmin(request, env, path){
   if(request.method === 'OPTIONS') return new Response(null,{status:204,headers:corsHeaders(request)});
-  const auth = adminSecretOk(request, env);
+  const auth = await adminOwnerOk(request, env);
   if(!auth.ok) return adminJson(request, {ok:false, error:auth.message}, auth.status);
+  if(path === '/api/admin/me' && request.method === 'GET') return adminJson(request,{ok:true,admin:true});
   if(path === '/api/admin/debug-auth' && request.method === 'POST'){
     return adminJson(request,{
       ok:true,
