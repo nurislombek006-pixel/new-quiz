@@ -419,11 +419,29 @@ function rateOk(request, id, env){
 // Only the Telegram account owner can use admin endpoints.
 // Netlify remains the backend: verify initData with the Mini App bot's server-side token.
 const ADMIN_OWNER_TELEGRAM_ID = '5305261101';
+// Netlify may carry a legacy APP_BOT_TOKEN while the Mini App is now launched by BOT_TOKEN.
+// Try only server-side configured bot tokens; never trust initDataUnsafe or a client-supplied ID.
 async function adminOwnerOk(request, env){
   const initData = request.headers.get('X-Telegram-Init-Data') || '';
-  const user = await verifyTelegramInitData(initData, getAppBotToken(env));
-  if(!user || String(user.id) !== ADMIN_OWNER_TELEGRAM_ID){
-    return {ok:false,status:403,message:'Админка доступна только владельцу в Telegram Mini App'};
+  if(!initData){
+    return {ok:false,status:401,code:'TELEGRAM_SESSION_MISSING',message:'Нет Telegram-сессии. Закройте Mini App и откройте через бота.'};
+  }
+  const tokens = [...new Set([
+    env.APP_BOT_TOKEN, env.WEBAPP_BOT_TOKEN, env.QUIZBOT_TOKEN, env.BOT_TOKEN
+  ].filter(token=>typeof token==='string' && token.trim()))];
+  if(!tokens.length){
+    return {ok:false,status:503,code:'TELEGRAM_BOT_NOT_CONFIGURED',message:'На Netlify не задан APP_BOT_TOKEN (токен бота, открывающего Mini App).'};
+  }
+  let signedUser = null;
+  for(const token of tokens){
+    signedUser = await verifyTelegramInitData(initData, token);
+    if(signedUser)break;
+  }
+  if(!signedUser){
+    return {ok:false,status:403,code:'TELEGRAM_SIGNATURE_INVALID',message:'Netlify не смог проверить Telegram-сессию. Проверьте APP_BOT_TOKEN и заново откройте Mini App.'};
+  }
+  if(String(signedUser.id)!==ADMIN_OWNER_TELEGRAM_ID){
+    return {ok:false,status:403,code:'NOT_ADMIN_OWNER',message:'Этот Telegram-аккаунт не является владельцем.'};
   }
   return {ok:true};
 }
@@ -442,7 +460,7 @@ async function readAdminBody(request){
 async function handleAdmin(request, env, path){
   if(request.method === 'OPTIONS') return new Response(null,{status:204,headers:corsHeaders(request)});
   const auth = await adminOwnerOk(request, env);
-  if(!auth.ok) return adminJson(request, {ok:false, error:auth.message}, auth.status);
+  if(!auth.ok) return adminJson(request, {ok:false, error:auth.message, code:auth.code||'ADMIN_ACCESS_DENIED'}, auth.status);
   if(path === '/api/admin/me' && request.method === 'GET') return adminJson(request,{ok:true,admin:true});
   if(path === '/api/admin/debug-auth' && request.method === 'POST'){
     return adminJson(request,{
