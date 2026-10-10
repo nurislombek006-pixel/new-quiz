@@ -81,3 +81,11 @@ test('Regular UI no longer shows mistake/progress counters',()=>{
   assert.doesNotMatch(embedded,/X-Admin-Secret/);
   assert.match(backend,/const auth = await adminOwnerOk\(request, env\)/);
 });
+
+test('Inline page scripts parse as JavaScript',()=>{
+  for(const [file,html] of [['public/index.html',website],['public/admin/index.html',embedded]]){
+    const chunks=Array.from(html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi),m=>m[1]);
+    assert.ok(chunks.length>0,file+' should contain inline scripts');
+    chunks.forEach((s,i)=>assert.doesNotThrow(()=>new vm.Script(s),file+' inline script '+i));
+  }
+});
