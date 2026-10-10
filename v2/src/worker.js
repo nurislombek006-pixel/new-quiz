@@ -72,7 +72,7 @@ async function webhook(req,env){
   return json({ok:true});
 }
 const secure=(x)=>String(x||'').slice(0,4000);
-async function route(req,env){
+async function route(req,env,ctx){
   if(!env.DB)return fail('Не настроена база D1',503);
   const token=await currentToken(env);
   if(!token)return fail('Токен бота ещё не настроен в Cloudflare Secrets',503);
@@ -147,6 +147,15 @@ async function route(req,env){
       await env.DB.prepare('UPDATE users SET is_banned=0,ban_reason=NULL,version=version+1 WHERE telegram_id=?').bind(id).run();
     }
     await audit(env.DB,user.id,action,id,{days:d.days,reason:d.reason});
+    const messages={
+      premium:'👑 Вам подключён Premium на '+Number(d.days)+' дн. Изменение уже действует.',
+      revoke:'Ваш Premium отключён. Изменение уже действует.',
+      ban:'⛔ Ваш доступ к тестированию ограничен. Причина: '+secure(d.reason||'Нарушение правил').slice(0,150),
+      unban:'✅ Ваша блокировка снята. Вы снова можете пользоваться тестированием.'
+    };
+    // Confirmation is fast: send the optional Telegram notification in background.
+    ctx?.waitUntil(telegram(env,'sendMessage',{chat_id:id,text:messages[action]})
+      .catch(e=>console.warn('User notification skipped:',String(e.message||e))));
     return json({ok:true,user:await profile(env.DB,id)});
   }
   if(path==='/api/admin/subject'&&req.method==='POST'){
@@ -197,7 +206,7 @@ export default {
   async fetch(req,env,ctx){
     const path=new URL(req.url).pathname;
     if(!path.startsWith('/api/'))return env.ASSETS.fetch(req);
-    try{return await route(req,env);}catch(e){console.error('API',e);return fail(e?.message||'Внутренняя ошибка',500);}
+    try{return await route(req,env,ctx);}catch(e){console.error('API',e);return fail(e?.message||'Внутренняя ошибка',500);}
   }
 };
 
