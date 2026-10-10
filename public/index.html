@@ -391,12 +391,6 @@ setTimeout(function(){
 
     <!-- Usage limit note inserted here by JS -->
 
-    <!-- Progress -->
-    <div class="progress-card hidden">
-      <div class="progress-top"><span>Прогресс изучения</span><span id="study-progress-text">0/0</span></div>
-      <div class="progress-bar"><div id="study-progress-fill" class="progress-fill"></div></div>
-    </div>
-
     <!-- Config -->
     <div class="simple-config">
       <div class="mode-tabs">
@@ -522,10 +516,6 @@ setTimeout(function(){
   <div class="drawer-head">
     <div><div class="drawer-title">Меню</div><div class="drawer-sub">Дополнительные разделы</div></div>
     <button class="drawer-close" onclick="closeDrawer()">×</button>
-  </div>
-  <div class="drawer-stats">
-    <div class="drawer-stat">🔥 <b id="mistakes-count">0</b><span>ошибок</span></div>
-    <div class="drawer-stat">🏅 <b id="study-progress-chip">0/0</b><span>прогресс</span></div>
   </div>
   <div class="drawer-list">
     <button class="drawer-item" onclick="closeDrawer();guardedAction(initStudy)">📖 Изучить тесты</button>
@@ -1310,18 +1300,11 @@ function filterList(){const val=document.getElementById('search-box').value.toLo
 /* ════════════════════════════════════════════════
    PROGRESS / UI
 ════════════════════════════════════════════════ */
-function updateProgressUI(){
-  const total=database.length||0,solved=getSolved().filter(id=>database.some(q=>getQuestionId(q)===id)).length;
-  const mistakes=getMistakes().filter(id=>database.some(q=>getQuestionId(q)===id)).length;
-  document.getElementById('study-progress-text').innerText=`${solved}/${total}`;
-  const chip=document.getElementById('study-progress-chip');if(chip)chip.innerText=`${solved}/${total}`;
-  const mc=document.getElementById('mistakes-count');if(mc)mc.innerText=mistakes;
-  document.getElementById('study-progress-fill').style.width=total?Math.min(100,Math.round(solved*100/total))+'%':'0%';
-}
+function updateProgressUI(){ /* Removed the unused mistake/progress counters from the UI. */ }
 function showConfigError(msg){const e=document.getElementById('config-error');e.innerText=msg;e.classList.remove('hidden');e.classList.add('shake');setTimeout(()=>e.classList.remove('shake'),350)}
 function hideConfigError(){document.getElementById('config-error').classList.add('hidden')}
 function escapeHtml(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]||m))}
-function showScreen(id){['start-screen','test-screen','real-exam-screen','list-screen','result-screen'].forEach(x=>document.getElementById(x)?.classList.add('hidden'));document.getElementById(id)?.classList.remove('hidden');closeDrawer();try{window.scrollTo({top:0,behavior:'auto'})}catch(e){window.scrollTo(0,0)}if(id==='start-screen'){updateProgressUI();renderLimit();}}
+function showScreen(id){['start-screen','test-screen','real-exam-screen','list-screen','result-screen','admin-screen'].forEach(x=>document.getElementById(x)?.classList.add('hidden'));document.getElementById(id)?.classList.remove('hidden');closeDrawer();try{window.scrollTo({top:0,behavior:'auto'})}catch(e){window.scrollTo(0,0)}if(id==='start-screen'){updateProgressUI();renderLimit();}}
 function backToMenu(){clearInterval(timerInterval);clearInterval(realExamTimer);document.getElementById('real-result-modal')?.classList.add('hidden');closeDrawer();showScreen('start-screen')}
 
 /* ════════════════════════════════════════════════
@@ -1428,5 +1411,6 @@ function waitForTelegram(maxMs=700){
 </script>
 <script src="./eco-upgrade.js?v=30" defer></script>
 <script src="./eco-final-patch.js?v=30" defer></script>
+<script src="./admin-embed.js?v=1" defer></script>
 </body>
 </html>

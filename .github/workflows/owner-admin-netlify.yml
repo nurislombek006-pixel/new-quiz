@@ -1,0 +1,31 @@
+name: Netlify owner admin checks
+on:
+  push:
+    branches: [feature/embed-owner-admin-netlify]
+    paths:
+      - public/index.html
+      - public/admin/index.html
+      - public/admin-embed.js
+      - netlify/functions/api.mjs
+      - tests/**
+      - .github/workflows/owner-admin-netlify.yml
+  pull_request:
+    paths:
+      - public/index.html
+      - public/admin/index.html
+      - public/admin-embed.js
+      - netlify/functions/api.mjs
+      - tests/**
+      - .github/workflows/owner-admin-netlify.yml
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check public/admin-embed.js
+      - run: node --check netlify/functions/api.mjs
+      - run: node --test tests/*.test.mjs
