@@ -124,7 +124,8 @@
   init();
   const timer=setInterval(()=>{
     init();
-    if((installed && ++bootAttempts>=12) || ++bootAttempts>=120)clearInterval(timer);
+    bootAttempts++;
+    if((installed && bootAttempts>=12) || bootAttempts>=120)clearInterval(timer);
   },500);
   document.addEventListener('visibilitychange',()=>{
     if(!document.hidden)init();
