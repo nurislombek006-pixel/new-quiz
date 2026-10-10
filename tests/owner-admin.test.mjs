@@ -75,10 +75,12 @@ test('Regular UI no longer shows mistake/progress counters',()=>{
   assert.doesNotMatch(website,/id="mistakes-count"/);
   assert.doesNotMatch(website,/id="study-progress-chip"/);
   assert.doesNotMatch(website,/id="study-progress-text"/);
-  assert.match(website,/admin-embed\.js\?v=2/);
+  assert.match(website,/admin-embed\.js\?v=3/);
   assert.match(embeddedScript,/OWNER_ID='5305261101'/);
-  assert.match(embeddedScript,/function ownerVisible\(\)/);
-  assert.match(embeddedScript,/ownerVisible\(\)/);
+  assert.match(embeddedScript,/async function checkOwner\(\)/);
+  assert.match(embeddedScript,/if\(!authorized\)return/);
+  assert.match(embeddedScript,/response\.ok&&result\?\.ok===true&&result\?\.admin===true/);
+  assert.match(embeddedScript,/\.subject-switch-wrap/);
   assert.match(embedded,/ownerInitData\(\)/);
   assert.doesNotMatch(embedded,/X-Admin-Secret/);
   assert.match(backend,/const auth = await adminOwnerOk\(request, env\)/);
@@ -90,4 +92,29 @@ test('Inline page scripts parse as JavaScript',()=>{
     assert.ok(chunks.length>0,file+' should contain inline scripts');
     chunks.forEach((s,i)=>assert.doesNotThrow(()=>new vm.Script(s),file+' inline script '+i));
   }
+});
+
+test('Owner can authenticate when APP_BOT_TOKEN is stale but BOT_TOKEN matches',async()=>{
+  const signed=await sign(newFields(5305261101));
+  const state=await funcs.adminOwnerOk(request(signed),{
+    APP_BOT_TOKEN:'12345:old_token_not_for_this_mini_app',
+    BOT_TOKEN:token
+  });
+  assert.equal(state.ok,true);
+});
+
+test('Admin APIs reject when Netlify bot tokens are missing',async()=>{
+  const signed=await sign(newFields(5305261101));
+  const result=await funcs.adminOwnerOk(request(signed),{});
+  assert.equal(result.ok,false);
+  assert.equal(result.status,503);
+  assert.equal(result.code,'TELEGRAM_BOT_NOT_CONFIGURED');
+});
+
+test('Owner authorization explains invalid Netlify token without exposing token values',async()=>{
+  const signed=await sign(newFields(5305261101));
+  const result=await funcs.adminOwnerOk(request(signed),{APP_BOT_TOKEN:'not_valid_for_current_bot'});
+  assert.equal(result.ok,false);
+  assert.equal(result.code,'TELEGRAM_SIGNATURE_INVALID');
+  assert.ok(!JSON.stringify(result).includes('not_valid_for_current_bot'));
 });
