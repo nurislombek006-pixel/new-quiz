@@ -84,6 +84,10 @@ async function route(req,env){
     const p=await profile(env.DB,user.id);
     return json({ok:true,user:p,admin,server_time:now(),online_window:45});
   }
+  if(path==='/api/state'&&req.method==='GET'){
+    const p=await profile(env.DB,user.id);
+    return json({ok:true,user:p,server_time:now()});
+  }
   if(path==='/api/ping'&&req.method==='POST'){
     await touch(env.DB,user);const p=await profile(env.DB,user.id);
     return json({ok:true,banned:!!p?.is_banned,premium_until:p?.premium_until||0,version:p?.version||0});
