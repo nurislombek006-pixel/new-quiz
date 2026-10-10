@@ -1,7 +1,7 @@
 name: Netlify owner admin checks
 on:
   push:
-    branches: [feature/embed-owner-admin-netlify]
+    branches: [main, feature/embed-owner-admin-netlify]
     paths:
       - public/index.html
       - public/admin/index.html
