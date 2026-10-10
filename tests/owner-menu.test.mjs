@@ -89,7 +89,7 @@ test('Owner sees a safe diagnostic instead of admin UI when Netlify rejects logi
   await tick();
   const diag=instance.document.getElementById('owner-auth-diagnostic');
   assert.ok(diag,'Owner must see access troubleshooting diagnostics');
-  assert.match(instance.document.getElementById('owner-auth-error-text').textContent,/HTTP_200/);
+  assert.match(instance.document.getElementById('owner-auth-error-text').textContent,/HTTP_403/);
   assert.equal(instance.document.getElementById('owner-admin-link'),null);
   assert.equal(instance.document.getElementById('admin-screen'),null);
 });
