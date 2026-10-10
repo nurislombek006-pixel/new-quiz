@@ -13,4 +13,6 @@ database_name = "new-quiz-v2"
 database_id = "REPLACE_WITH_D1_DATABASE_ID"
 
 # Secrets MUST be set through "wrangler secret put":
-# BOT_TOKEN, OWNER_TG_ID, WEBHOOK_SECRET, PUBLIC_URL
+# BOT_TOKEN, OWNER_TG_ID, WEBHOOK_SECRET, PUBLIC_URL, BOT_TOKEN_ENCRYPTION_KEY
+# Owner Telegram ID must be set as Cloudflare secret, not committed here.
+# The first BOT_TOKEN is a bootstrap secret. Later rotations are encrypted in D1.
