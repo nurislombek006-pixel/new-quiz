@@ -75,11 +75,11 @@ const secure=(x)=>String(x||'').slice(0,4000);
 async function route(req,env,ctx){
   if(!env.DB)return fail('Не настроена база D1',503);
   const token=await currentToken(env);
-  if(!token)return fail('Токен бота ещё не настроен в Cloudflare Secrets',503);
+  // Public demo does not require a bot token. Telegram login and admin do.
   env={...env,BOT_TOKEN:token};
   const url=new URL(req.url),path=url.pathname;
   if(path==='/api/telegram-webhook'&&req.method==='POST')return webhook(req,env);
-  if(path==='/api/health')return json({ok:true,service:'new-quiz-v2'});
+  if(path==='/api/health')return json({ok:true,service:'new-quiz-v2',bot_configured:!!token,guest_demo:true});
   if(path==='/api/bot'&&req.method==='GET')return json({ok:true,bot:await getBotStatus(env)});
   const user=await auth(req,env);
   if(!user){
