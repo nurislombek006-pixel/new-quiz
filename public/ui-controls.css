@@ -1,0 +1,141 @@
+/* Compact premium-payment UI and user-controlled quiz scale.
+   Scoped to payment and the new scale setting; original site palette untouched. */
+#paywall:not(.blocked-mode) .paybox{
+  max-width:400px;
+  padding:19px 16px 16px;
+}
+#paywall:not(.blocked-mode) .pay-icon{
+  width:44px;height:44px;font-size:23px;margin-bottom:7px;
+}
+#paywall:not(.blocked-mode) .pay-title{font-size:21px;margin-bottom:4px}
+#paywall:not(.blocked-mode) .pay-sub{
+  font-size:13px;font-weight:600;margin:0 0 14px;line-height:1.4;
+}
+#paywall:not(.blocked-mode) .pay-card-payment{
+  border-radius:17px;
+  padding:13px;
+  margin:0 0 11px;
+}
+#paywall:not(.blocked-mode) .pay-price-box{
+  padding:11px 10px;
+  margin:0 0 12px;
+  border-radius:13px;
+}
+#paywall:not(.blocked-mode) .pay-price-title{
+  font-size:11px;
+  margin-bottom:5px;
+}
+#paywall:not(.blocked-mode) .pay-price{font-size:30px}
+#paywall:not(.blocked-mode) .pay-card-number-row{
+  padding:7px 8px;border-radius:12px;
+}
+#paywall:not(.blocked-mode) .pay-card-number{
+  font-size:clamp(15px,4.8vw,20px);
+  letter-spacing:.5px;
+}
+#paywall:not(.blocked-mode) .pay-card-payment .btn{
+  min-height:43px;
+  border-radius:12px;
+  margin-top:9px!important;
+}
+#paywall:not(.blocked-mode) .pay-after-text,
+#paywall:not(.blocked-mode) .pay-transfer-text,
+#paywall:not(.blocked-mode) #pay-danger-note{
+  display:none!important;
+}
+#paywall:not(.blocked-mode) #pay-error:empty,
+#paywall:not(.blocked-mode) #pay-success-msg:empty{
+  display:none;
+}
+#paywall .pay-extra-details{
+  margin:0 0 10px;
+  border:1px solid #334155;
+  border-radius:13px;
+  background:#111e30;
+}
+#paywall .pay-extra-details summary{
+  cursor:pointer;
+  list-style:none;
+  font-size:13px;
+  font-weight:700;
+  color:#cbd5e1;
+  padding:12px 14px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  user-select:none;
+}
+#paywall .pay-extra-details summary::-webkit-details-marker{display:none}
+#paywall .pay-extra-details summary::after{content:"⌄";font-size:17px}
+#paywall .pay-extra-details[open] summary::after{content:"⌃"}
+#paywall .pay-extra-details-content{padding:0 10px 8px}
+#paywall .pay-extra-details .pay-card{margin-bottom:6px}
+#paywall.blocked-mode .pay-extra-details,
+#paywall.blocked-mode .pay-card-payment{display:none!important}
+#paywall .pay-steps{
+  margin:2px 4px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  font-size:11px;
+  font-weight:650;
+  line-height:1.5;
+  color:#94a3b8;
+}
+#paywall .pay-steps span{white-space:nowrap}
+#paywall .pay-steps .pay-step-dot{
+  width:4px;height:4px;border-radius:50%;background:#64748b;flex:none;
+}
+#paywall.blocked-mode .pay-steps{display:none}
+@media(max-width:390px){
+  #paywall:not(.blocked-mode) .paybox{padding:17px 12px 14px}
+  #paywall:not(.blocked-mode) .pay-card-number{font-size:15px;letter-spacing:.1px}
+}
+#ui-scale-setting.scale-setting{
+  grid-column:1/-1;
+  text-align:left;
+  gap:9px;
+  padding:12px 14px;
+}
+#ui-scale-setting .ui-scale-header{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+#ui-scale-setting .ui-scale-title{
+  font-size:13px;font-weight:900;color:var(--txt);
+}
+#ui-scale-setting .ui-scale-value{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:62px;min-height:30px;padding:3px 9px;
+  color:var(--txt);
+  background:var(--card2);
+  border:1px solid var(--line);
+  border-radius:10px;font-size:14px;font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
+#ui-scale-setting .ui-scale-row{
+  display:grid;grid-template-columns:38px minmax(0,1fr) 38px;gap:9px;
+  align-items:center;
+}
+#ui-scale-setting .ui-scale-adjust{
+  width:38px;height:38px;border-radius:12px;
+  border:1px solid var(--line);background:var(--card2);color:var(--txt);
+  font-size:22px;font-weight:750;cursor:pointer;
+}
+#ui-scale-setting .ui-scale-adjust:active{transform:scale(.95)}
+#ui-scale-setting .ui-scale-slider{
+  display:block;width:100%;margin:0;
+  height:24px;accent-color:#7c3aed;
+  cursor:pointer;
+}
+#ui-scale-setting .ui-scale-bottom{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  font-size:11px;color:var(--muted);font-weight:700;
+}
+#ui-scale-setting .ui-scale-reset{
+  padding:6px 10px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:var(--card2);color:var(--txt);
+  font-size:11px;font-weight:850;cursor:pointer;
+}
