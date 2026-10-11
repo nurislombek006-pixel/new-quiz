@@ -53,3 +53,9 @@ body.admin-embedded #usersMore{margin:12px 0}
  body.admin-embedded .people-toolbar{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
  body.admin-embedded .people-list{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+body.admin-embedded #questions .fold-stack{display:block}
+body.admin-embedded #questions .question-fold>.card>h2:first-child{display:none}
+body.admin-embedded .fold-inline{padding:0 8px;margin:10px 0}
+body.admin-embedded .fold-inline>summary{padding:9px 3px;font-size:12px}
+body.admin-embedded #banReason{min-height:70px}
