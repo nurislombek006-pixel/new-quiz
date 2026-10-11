@@ -975,7 +975,9 @@ async function handleRequest(request, env){
       const user = await verifyTelegramInitData(initData, getAppBotToken(env));
       if(!user)return jsonResponse(request,{ok:false,error:'Откройте через Telegram Mini App'},401);
     }
-    const data = await getTestsData(env);
+    // Allow the user-facing subject refresh button to bypass the in-memory question list cache.
+    const forceRefresh = new URL(request.url).searchParams.get('refresh') === '1';
+    const data = await getTestsData(env, forceRefresh);
     return jsonResponse(request, shuffleTestsDataForClient(data));
   }
 
