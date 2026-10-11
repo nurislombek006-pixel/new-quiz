@@ -82,8 +82,10 @@ body.admin-embedded .card{margin:9px 0}
         <h2>💎 Выдать Premium</h2>
         <label>Telegram ID</label><input id="premId" inputmode="numeric" placeholder="5305261101">
         <div class="grid2"><div><label>Дней</label><input id="premDays" type="number" min="0" value="30"></div><div><label>Дата окончания, необязательно</label><input id="premExpires" type="date"></div></div>
+        <details class="fold fold-inline"><summary>Дополнительно: устройство и заметка</summary>
         <label>Fingerprint, необязательно</label><input id="premFp" placeholder="45A2C438">
         <label>Заметка для себя</label><input id="premNote" value="Выдано вручную">
+        </details>
         <div class="row" style="margin-top:12px"><button class="btn green" onclick="givePremium()">Выдать премиум</button><button class="btn red" onclick="removePremium()">Убрать</button><button class="btn" onclick="checkUserFromPremium()">Проверить</button></div>
         <div class="mini">Если fingerprint пустой — премиум работает на любом устройстве. Если заполнен — только на этом устройстве.</div>
       </div>
