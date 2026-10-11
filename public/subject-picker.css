@@ -54,3 +54,62 @@ body.subject-picker-open{overflow:hidden!important}
  .subject-picker-panel{padding:12px;border-radius:15px}
  .subject-picker-item{font-size:12px}
 }
+
+/* Smooth open / close and option movement without heavy layout animations. */
+@media(prefers-reduced-motion:no-preference){
+  .subject-picker-layer{
+    animation:qb-picker-backdrop-in 160ms ease-out both;
+  }
+  .subject-picker-layer.is-closing{
+    animation:qb-picker-backdrop-out 155ms ease-in both;
+    pointer-events:none;
+  }
+  .subject-picker-panel{
+    animation:qb-picker-panel-in 195ms cubic-bezier(.18,.82,.22,1) both;
+  }
+  .subject-picker-layer.is-closing .subject-picker-panel{
+    animation:qb-picker-panel-out 150ms ease-in both;
+  }
+  @keyframes qb-picker-backdrop-in{
+    from{opacity:0}to{opacity:1}
+  }
+  @keyframes qb-picker-backdrop-out{
+    from{opacity:1}to{opacity:0}
+  }
+  @keyframes qb-picker-panel-in{
+    from{opacity:.55;transform:translate3d(0,10px,0) scale(.97)}
+    to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+  }
+  @keyframes qb-picker-panel-out{
+    from{opacity:1;transform:translate3d(0,0,0) scale(1)}
+    to{opacity:.6;transform:translate3d(0,6px,0) scale(.985)}
+  }
+  .subject-picker-item{
+    transition:transform 145ms cubic-bezier(.2,.82,.25,1),
+      border-color 145ms ease,background-color 145ms ease,box-shadow 145ms ease!important;
+  }
+  .subject-picker-item:active{transform:scale(.975)}
+  @media(hover:hover) and (pointer:fine){
+    .subject-picker-item:hover{transform:translate3d(0,-1px,0);border-color:#5c8de3}
+  }
+  .subject-picker-item:nth-child(-n+8){
+    animation:qb-picker-item-in 175ms cubic-bezier(.2,.82,.25,1) both;
+  }
+  .subject-picker-item:nth-child(2){animation-delay:20ms}
+  .subject-picker-item:nth-child(3){animation-delay:40ms}
+  .subject-picker-item:nth-child(4){animation-delay:60ms}
+  .subject-picker-item:nth-child(5){animation-delay:80ms}
+  .subject-picker-item:nth-child(6){animation-delay:100ms}
+  @keyframes qb-picker-item-in{
+    from{opacity:.55;transform:translate3d(0,5px,0)}
+    to{opacity:1;transform:translate3d(0,0,0)}
+  }
+  .subject-picker-close,.subject-picker-reload{
+    transition:transform 145ms ease,background-color 145ms ease!important;
+  }
+  .subject-picker-close:active,.subject-picker-reload:active{transform:scale(.975)}
+}
+@media(prefers-reduced-motion:reduce){
+  .subject-picker-layer,.subject-picker-panel,.subject-picker-item,
+  .subject-picker-reload,.subject-picker-close{animation:none!important;transition:none!important}
+}
