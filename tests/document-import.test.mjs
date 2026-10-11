@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 // Load the vendored browser UMD build exactly as Telegram WebView does.
-const vendorContext={window:{},console,Promise,Uint8Array,ArrayBuffer,TextEncoder,TextDecoder,Buffer,setTimeout,clearTimeout};
+const vendorContext={window:{},console,Promise,Uint8Array,ArrayBuffer,TextEncoder,TextDecoder,Buffer,setTimeout,clearTimeout,setImmediate,clearImmediate};
 vm.createContext(vendorContext);
 vm.runInContext(readFileSync('public/admin/vendor/jszip.min.js','utf8'),vendorContext);
 const JSZip=vendorContext.window.JSZip;
