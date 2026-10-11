@@ -320,8 +320,9 @@
 <link rel="stylesheet" href="./drawer-clarity.css?v=1"/>
 <link rel="stylesheet" href="./drawer-v2.css?v=1"/>
 <link rel="stylesheet" href="./ui-controls.css?v=2"/>
+<link rel="stylesheet" href="./ban-lock.css?v=1"/>
 </head>
-<body>
+<body class="qb-access-pending">
 <script>
 // Safety fallback: show menu within 1.4s no matter what
 setTimeout(function(){
@@ -701,6 +702,7 @@ async function loadLists(){
     }
     if(id&&data.isBlocked){
       bannedUsers[id]={active:true,reason:data.blockReason||'Доступ заблокирован.',type:data.blockType||'permanent',until:data.until||''};
+      if(data.trusted===true)showBlockedPaywall();
     }
     if(id&&data.deviceBlocked){
       deviceUsers[id]={active:true,fingerprint:'BACKEND_LOCK',reason:data.deviceReason||'Вход с нового устройства заблокирован.'};
@@ -713,6 +715,7 @@ async function loadLists(){
     accessLists.premium=fb;accessLists.banned=fb;accessLists.devices=fb;
   }
   window.accessLists=accessLists;
+  document.body.classList.remove('qb-access-pending');
   return accessLists;
 }
 
@@ -923,6 +926,7 @@ async function guardedAction(fn){
   if(ok)fn();
 }
 async function guardedStart(){
+  if(window.__quizbotHardBlocked){showBlockedPaywall();return;}
   buttonPop(event);
   const info=limitInfo();
   if(!info.premium && info.locked){
@@ -940,6 +944,7 @@ async function guardedStart(){
    PAYWALL HELPERS
 ════════════════════════════════════════════════ */
 function resetPaywallMode(){
+  if(window.__quizbotHardBlocked)return;
   const p=document.getElementById('paywall');
   if(p)p.classList.remove('blocked-mode');
   const icon=document.getElementById('pay-icon');if(icon)icon.textContent='🔐';
@@ -950,33 +955,46 @@ function resetPaywallMode(){
   const e=document.getElementById('pay-error');if(e){e.style.color='';e.textContent='';}
 }
 function showPaywall(msg=''){
+  if(window.__quizbotHardBlocked){showBlockedPaywall();return;}
   resetPaywallMode();
   const uid=document.getElementById('pay-user-id');
   if(uid)uid.innerText=tgUserId||'Откройте через Telegram Mini App';
   document.getElementById('paywall').classList.remove('hidden');
   if(msg)showPayError(msg);
 }
-function showBlockedPaywall(reason=''){
-  const uid=document.getElementById('pay-user-id');
-  if(uid)uid.innerText=tgUserId||'Откройте через Telegram Mini App';
+function showBlockedPaywall(){
+  window.__quizbotHardBlocked=true;
+  document.body.classList.remove('qb-access-pending');
+  document.body.classList.add('qb-hard-banned');
+  try{clearInterval(timerInterval);clearInterval(realExamTimer)}catch(e){}
   const p=document.getElementById('paywall');
-  if(p){p.classList.remove('hidden');p.classList.add('blocked-mode');}
-  const icon=document.getElementById('pay-icon');if(icon)icon.textContent='🚫';
-  const title=document.getElementById('pay-title');if(title)title.textContent='Доступ заблокирован';
-  const sub=document.getElementById('pay-sub');if(sub)sub.textContent='Ваш аккаунт был заблокирован администрацией сайта.';
-  const note=document.getElementById('pay-danger-note');if(note)note.textContent='Если вы считаете, что блокировка произошла по ошибке, свяжитесь с администратором.';
-  if(!document.getElementById('blocked-contact-card')){
-    const paymentCard=document.querySelector('#paywall .pay-card-payment');
-    const card=document.createElement('div');
-    card.id='blocked-contact-card';
-    card.className='pay-card blocked-card';
-    card.innerHTML=`<div class="blocked-main-text">Вы были заблокированы администрацией.</div><div class="blocked-small-text">Прохождение тестов и премиум-доступ для этого аккаунта временно недоступны.</div><a class="btn btn-red btn-full" href="https://t.me/nurislombekm" target="_blank" style="text-decoration:none">💬 Написать администратору</a>`;
-    if(paymentCard)paymentCard.insertAdjacentElement('afterend',card);
+  if(!p)return;
+  p.classList.remove('hidden');
+  p.classList.add('blocked-mode');
+  const icon=document.getElementById('pay-icon');
+  if(icon)icon.textContent='🚫';
+  const title=document.getElementById('pay-title');
+  if(title)title.textContent='Доступ заблокирован';
+  const sub=document.getElementById('pay-sub');
+  if(sub)sub.textContent='Вы были заблокированы администрацией';
+  const x=document.getElementById('pay-close-btn');
+  if(x){x.hidden=true;x.disabled=true;x.setAttribute('aria-hidden','true')}
+  const note=document.getElementById('pay-danger-note');
+  if(note)note.textContent='';
+  const error=document.getElementById('pay-error');
+  if(error)error.textContent='';
+  let contact=document.getElementById('blocked-contact-card');
+  if(!contact){
+    contact=document.createElement('div');
+    contact.id='blocked-contact-card';
+    contact.className='pay-card blocked-card';
+    const previous=document.querySelector('#paywall .pay-card-payment');
+    if(previous)previous.insertAdjacentElement('afterend',contact);
+    else p.querySelector('.paybox')?.append(contact);
   }
-  const e=document.getElementById('pay-error');
-  if(e){e.textContent=reason||'Причина: нарушение правил использования сайта.';e.style.color='#fca5a5';}
+  contact.innerHTML='<a class="btn btn-red btn-full" href="https://t.me/nurislombekm" target="_blank" rel="noopener" style="text-decoration:none">💬 Написать администратору</a>';
 }
-function hidePaywall(){document.getElementById('paywall').classList.add('hidden')}
+function hidePaywall(){if(window.__quizbotHardBlocked){showBlockedPaywall();return;}document.getElementById('paywall').classList.add('hidden')}
 function clearPayMessages(){
   const e=document.getElementById('pay-error'),s=document.getElementById('pay-success-msg');
   if(e){e.textContent='';e.style.color='';}
@@ -1189,6 +1207,7 @@ function shuffleQuestionOptions(q){
 function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
 
 function startTest(){
+  if(window.__quizbotHardBlocked){showBlockedPaywall();return;}
   hideConfigError();
   if(runMode==='real'){startRealExam();return}
   const{type,pool,sourceLabel,from,to}=getChosenPool();
@@ -1306,6 +1325,7 @@ function showRealResultModal(correct,total){
 function closeRealResultToMenu(){document.getElementById('real-result-modal').classList.add('hidden');backToMenu();}
 function viewRealAnswers(){document.getElementById('real-result-modal').classList.add('hidden');renderRealExam();setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),50);}
 function startRealExam(){
+  if(window.__quizbotHardBlocked){showBlockedPaywall();return;}
   let pool=[...database];
   const from=Math.max(1,parseInt(document.getElementById('range-from')?.value||'1',10)||1);
   let to=parseInt(document.getElementById('range-to')?.value||String(database.length),10);
@@ -1418,7 +1438,7 @@ function updateProgressUI(){ /* Removed the unused mistake/progress counters fro
 function showConfigError(msg){const e=document.getElementById('config-error');e.innerText=msg;e.classList.remove('hidden');e.classList.add('shake');setTimeout(()=>e.classList.remove('shake'),350)}
 function hideConfigError(){document.getElementById('config-error').classList.add('hidden')}
 function escapeHtml(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]||m))}
-function showScreen(id){['start-screen','test-screen','real-exam-screen','list-screen','result-screen','admin-screen'].forEach(x=>document.getElementById(x)?.classList.add('hidden'));document.getElementById(id)?.classList.remove('hidden');closeDrawer();try{window.scrollTo({top:0,behavior:'auto'})}catch(e){window.scrollTo(0,0)}if(id==='start-screen'){updateProgressUI();renderLimit();}}
+function showScreen(id){if(window.__quizbotHardBlocked){showBlockedPaywall();return;}['start-screen','test-screen','real-exam-screen','list-screen','result-screen','admin-screen'].forEach(x=>document.getElementById(x)?.classList.add('hidden'));document.getElementById(id)?.classList.remove('hidden');closeDrawer();try{window.scrollTo({top:0,behavior:'auto'})}catch(e){window.scrollTo(0,0)}if(id==='start-screen'){updateProgressUI();renderLimit();}}
 function backToMenu(){clearInterval(timerInterval);clearInterval(realExamTimer);document.getElementById('real-result-modal')?.classList.add('hidden');closeDrawer();showScreen('start-screen')}
 
 /* ════════════════════════════════════════════════
@@ -1514,6 +1534,7 @@ function waitForTelegram(maxMs=700){
       // Two-device check for premium users only (no reason to alert free users)
       if(fromFile&&tgUserId) checkTwoDevices();
     }).catch(()=>{});
+    setInterval(()=>{if(tgUserId&&!document.hidden)loadLists().catch(()=>{});},45000);
 
   }catch(e){
     showScreen('start-screen');
