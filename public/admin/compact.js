@@ -94,7 +94,7 @@ function renderUsers(){
       return '<div class="person"><div class="person-head"><div><div class="person-name">'+name+
         '</div><div class="person-handle">'+handle+'</div></div><span class="person-status">'+status+'</span></div>'+
         '<div class="person-id">Telegram ID: '+escapeHtml(u.id)+'</div>'+
-        '<div class="person-time">'+recent+'<div>Последняя активность: '+escapeHtml(activityTime(u.last_seen))+'</div></div>'+
+        '<div class="person-time">'+recent+'<div>Последний вход: '+escapeHtml(activityTime(u.last_opened||u.first_seen))+'</div><div>Последняя активность: '+escapeHtml(activityTime(u.last_seen))+'</div></div>'+
         '<div class="person-foot"><span class="person-status">Открытий: '+Math.max(0,Number(u.opens)||0)+'</span>'+
         '<button type="button" class="btn compact" data-manage-user="'+escapeHtml(u.id)+'">Управлять ↗</button></div></div>';
     }).join('');
