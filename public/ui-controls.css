@@ -92,50 +92,95 @@
   #paywall:not(.blocked-mode) .paybox{padding:17px 12px 14px}
   #paywall:not(.blocked-mode) .pay-card-number{font-size:15px;letter-spacing:.1px}
 }
-#ui-scale-setting.scale-setting{
-  grid-column:1/-1;
-  text-align:left;
-  gap:9px;
-  padding:12px 14px;
+
+/* Scale v2: never apply zoom, transform or oversized width to the site.
+   Keep menu controls reachable even at the maximum text size. */
+.app{
+  zoom:1!important;
+  width:100%!important;
+  max-width:520px!important;
 }
-#ui-scale-setting .ui-scale-header{
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
+#side-drawer.qb-drawer-v2 #ui-scale-setting{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:9px!important;
+  padding:11px 14px 12px!important;
+  margin:0!important;
+  background:#eeeafa!important;
+  border-bottom:1px solid #ded8ef!important;
+  box-sizing:border-box!important;
+  min-height:0!important;
 }
-#ui-scale-setting .ui-scale-title{
-  font-size:13px;font-weight:900;color:var(--txt);
+#side-drawer.qb-drawer-v2 .ui-scale-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;
 }
-#ui-scale-setting .ui-scale-value{
-  display:inline-flex;align-items:center;justify-content:center;
-  min-width:62px;min-height:30px;padding:3px 9px;
-  color:var(--txt);
-  background:var(--card2);
-  border:1px solid var(--line);
-  border-radius:10px;font-size:14px;font-weight:900;
-  font-variant-numeric:tabular-nums;
+#side-drawer.qb-drawer-v2 .ui-scale-title{
+  font-size:10.5px!important;
+  letter-spacing:1px!important;
+  font-weight:800!important;
+  color:#645c87!important;
 }
-#ui-scale-setting .ui-scale-row{
-  display:grid;grid-template-columns:38px minmax(0,1fr) 38px;gap:9px;
-  align-items:center;
+#side-drawer.qb-drawer-v2 .ui-scale-value{
+  font-size:12px!important;font-weight:900!important;
+  font-variant-numeric:tabular-nums!important;
+  color:#4e4481!important;
+  min-width:42px;text-align:right;
 }
-#ui-scale-setting .ui-scale-adjust{
-  width:38px;height:38px;border-radius:12px;
-  border:1px solid var(--line);background:var(--card2);color:var(--txt);
-  font-size:22px;font-weight:750;cursor:pointer;
+#side-drawer.qb-drawer-v2 .ui-scale-buttons{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.75fr);
+  gap:8px;
 }
-#ui-scale-setting .ui-scale-adjust:active{transform:scale(.95)}
-#ui-scale-setting .ui-scale-slider{
-  display:block;width:100%;margin:0;
-  height:24px;accent-color:#7c3aed;
+#side-drawer.qb-drawer-v2 .ui-scale-btn{
+  height:43px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:5px!important;
+  min-width:0!important;
+  border-radius:12px!important;
+  background:white!important;
+  border:1px solid #d9d3f0!important;
+  color:#373269!important;
+  box-shadow:0 2px 7px rgba(51,43,96,.05)!important;
   cursor:pointer;
+  font-size:18px!important;font-weight:850!important;line-height:1!important;
+  transition:background 120ms ease,transform 120ms ease!important;
+  touch-action:manipulation;
 }
-#ui-scale-setting .ui-scale-bottom{
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
-  font-size:11px;color:var(--muted);font-weight:700;
+#side-drawer.qb-drawer-v2 .ui-scale-btn:active:not(:disabled){
+  transform:scale(.97);
+  background:#eae4ff!important;
 }
-#ui-scale-setting .ui-scale-reset{
-  padding:6px 10px;
-  border-radius:10px;
-  border:1px solid var(--line);
-  background:var(--card2);color:var(--txt);
-  font-size:11px;font-weight:850;cursor:pointer;
+#side-drawer.qb-drawer-v2 .ui-scale-btn:disabled{opacity:.45;cursor:default}
+#side-drawer.qb-drawer-v2 #ui-scale-minus{font-size:17px!important}
+#side-drawer.qb-drawer-v2 #ui-scale-plus{font-size:23px!important}
+#side-drawer.qb-drawer-v2 #ui-scale-reset{font-size:11px!important}
+body:not(.light) #side-drawer.qb-drawer-v2 #ui-scale-setting{
+  background:#232344!important;border-bottom-color:#403967!important;
+}
+body:not(.light) #side-drawer.qb-drawer-v2 .ui-scale-title{color:#bcb4e9!important}
+body:not(.light) #side-drawer.qb-drawer-v2 .ui-scale-value{color:#ded8ff!important}
+body:not(.light) #side-drawer.qb-drawer-v2 .ui-scale-btn{
+  color:#fafaff!important;background:#333054!important;border-color:#504a7c!important;
+}
+/* Make quiz content readable without changing the layout box. */
+.app .question{font-size:calc(18px * var(--qb-reader-scale,1))!important;overflow-wrap:anywhere}
+.app .option{font-size:calc(15px * var(--qb-reader-scale,1))!important;overflow-wrap:anywhere}
+.app .real-q-title{font-size:calc(16px * var(--qb-reader-scale,1))!important;overflow-wrap:anywhere}
+.app .real-option{font-size:calc(14px * var(--qb-reader-scale,1))!important;overflow-wrap:anywhere}
+.app .item-q{font-size:calc(15px * var(--qb-reader-scale,1))!important;overflow-wrap:anywhere}
+.app .study-opt,.app .answer{font-size:calc(14px * var(--qb-reader-scale,1))!important;overflow-wrap:anywhere}
+.app .q-index{font-size:calc(12.5px * var(--qb-control-scale,1))!important}
+.app .real-meta,.app .list-title-row{overflow-wrap:anywhere}
+.app .simple-label{font-size:calc(14px * var(--qb-control-scale,1))!important}
+.app .btn{font-size:calc(14px * var(--qb-control-scale,1))!important;white-space:normal;overflow-wrap:anywhere}
+.app .mode-tab{font-size:calc(13px * var(--qb-control-scale,1))!important}
+.app .title{font-size:calc(23px * var(--qb-control-scale,1))!important}
+.app .welcome-subject{font-size:calc(17px * var(--qb-control-scale,1))!important}
+@media(max-width:380px){
+  #side-drawer.qb-drawer-v2 #ui-scale-setting{padding:9px 11px!important}
+  #side-drawer.qb-drawer-v2 .ui-scale-btn{height:40px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #side-drawer.qb-drawer-v2 .ui-scale-btn{transition:none!important}
 }
