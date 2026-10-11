@@ -122,6 +122,11 @@
       if(typeof window.backToMenu==='function')window.backToMenu();
       else if(typeof window.showScreen==='function')window.showScreen('start-screen');
       hideSubjectOnAdmin();
+      // An owner may have just created a subject or imported questions.
+      // Pull the new catalog without restarting Telegram or altering the database.
+      if(typeof window.refreshSubjectCatalog==='function'){
+        window.refreshSubjectCatalog().catch(()=>{});
+      }
     };
     header.append(heading,back);
     const frame=document.createElement('iframe');
