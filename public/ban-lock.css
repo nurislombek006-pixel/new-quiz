@@ -1,0 +1,50 @@
+/* Permanent ban screen. A ban cannot be dismissed into the free tier. */
+body.qb-access-pending .app{visibility:hidden!important;pointer-events:none!important}
+body.qb-hard-banned .app,
+body.qb-hard-banned #side-drawer,
+body.qb-hard-banned #drawer-backdrop,
+body.qb-hard-banned #real-result-modal,
+body.qb-hard-banned #offer-modal,
+body.qb-hard-banned #auth-loading{
+  display:none!important;visibility:hidden!important;pointer-events:none!important
+}
+body.qb-hard-banned #paywall.paywall.blocked-mode{
+  display:flex!important;visibility:visible!important;
+  position:fixed!important;inset:0!important;z-index:2147483647!important;
+  align-items:center!important;justify-content:center!important;
+  background:radial-gradient(circle at 50% 15%,rgba(239,68,68,.18),transparent 42%),#070d19!important;
+  padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))!important
+}
+#paywall.blocked-mode #pay-close-btn,
+#paywall.blocked-mode .pay-close,
+#paywall.blocked-mode .pay-card-payment,
+#paywall.blocked-mode .pay-extra-details,
+#paywall.blocked-mode .pay-steps,
+#paywall.blocked-mode #pay-danger-note,
+#paywall.blocked-mode #pay-error,
+#paywall.blocked-mode .blocked-small-text,
+#paywall.blocked-mode .pay-success{
+  display:none!important
+}
+#paywall.blocked-mode .paybox{
+  width:100%;max-width:360px!important;
+  padding:26px 20px!important;margin:auto!important;
+  border:1px solid rgba(248,113,113,.32)!important;
+  background:#101a2c!important;text-align:center!important
+}
+#paywall.blocked-mode .pay-icon{
+  width:62px;height:62px;margin:0 auto 15px;font-size:29px;
+  display:grid;place-items:center;border-radius:20px
+}
+#paywall.blocked-mode .pay-title{font-size:23px!important;margin-bottom:12px!important}
+#paywall.blocked-mode .pay-sub{
+  font-size:15px!important;font-weight:700!important;line-height:1.5!important;
+  margin:0 0 18px!important;color:#fecaca!important
+}
+#paywall.blocked-mode .blocked-card{
+  background:none!important;border:0!important;padding:0!important;
+  box-shadow:none!important;margin:0!important
+}
+#paywall.blocked-mode .blocked-card a{
+  min-height:48px;border-radius:14px;margin-top:6px;font-size:14px
+}
