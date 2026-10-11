@@ -51,54 +51,17 @@ function docxXmlToText(xml){
 }
 async function docxTextFromArrayBuffer(buffer){
   if(buffer.byteLength>DOC_IMPORT_MAX_BYTES)throw Error('Файл больше 5 МБ. Раздели его на несколько документов.');
-  const data=new DataView(buffer);
-  const bytes=new Uint8Array(buffer);
-  let eocd=-1;
-  for(let i=bytes.length-22;i>=Math.max(0,bytes.length-65557);i--){
-    if(data.getUint32(i,true)===0x06054b50){eocd=i;break}
-  }
-  if(eocd<0)throw Error('Не удалось открыть Word-файл: структура DOCX повреждена.');
-  const count=data.getUint16(eocd+10,true);
-  const offset=data.getUint32(eocd+16,true);
-  const directorySize=data.getUint32(eocd+12,true);
-  if(count>10000||offset>bytes.length||directorySize>bytes.length-offset)throw Error('Некорректная структура DOCX.');
-  let at=offset;
-  const decode=new TextDecoder('utf-8');
-  for(let i=0;i<count;i++){
-    if(at+46>bytes.length||data.getUint32(at,true)!==0x02014b50)throw Error('Повреждён каталог DOCX.');
-    const method=data.getUint16(at+10,true);
-    const zipped=data.getUint32(at+20,true);
-    const uncompressed=data.getUint32(at+24,true);
-    const nlen=data.getUint16(at+28,true);
-    const extra=data.getUint16(at+30,true);
-    const comment=data.getUint16(at+32,true);
-    const localOffset=data.getUint32(at+42,true);
-    if(at+46+nlen>bytes.length)throw Error('Повреждены имена файлов в DOCX.');
-    const name=decode.decode(bytes.subarray(at+46,at+46+nlen));
-    at+=46+nlen+extra+comment;
-    if(at>bytes.length)throw Error('Повреждён каталог DOCX.');
-    if(name!=='word/document.xml')continue;
-    if(uncompressed>8*1024*1024)throw Error('Word-документ слишком большой. Раздели вопросы на части.');
-    if(localOffset+30>bytes.length||data.getUint32(localOffset,true)!==0x04034b50)throw Error('Повреждена запись текста Word.');
-    const start=localOffset+30+data.getUint16(localOffset+26,true)+data.getUint16(localOffset+28,true);
-    if(start+zipped>bytes.length)throw Error('Повреждён сжатый текст Word.');
-    const part=bytes.slice(start,start+zipped);
-    let xml;
-    if(method===0)xml=decode.decode(part);
-    else if(method===8){
-      if(typeof DecompressionStream!=='function')throw Error('Этот браузер не поддерживает чтение DOCX. Сохрани документ как TXT.');
-      try{
-        const stream=new Blob([part]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-        const result=await new Response(stream).arrayBuffer();
-        if(result.byteLength>8*1024*1024)throw Error('Word-документ слишком большой.');
-        xml=decode.decode(result);
-      }catch(e){throw Error('Не удалось распаковать DOCX. Сохрани документ заново как DOCX или TXT.')}
-    }else throw Error('Неизвестный способ сжатия DOCX.');
-    return docxXmlToText(xml);
-  }
-  throw Error('Файл DOCX не содержит word/document.xml.');
+  if(typeof JSZip==='undefined')throw Error('Компонент чтения DOCX не загрузился. Обнови страницу.');
+  let zip;
+  try{zip=await JSZip.loadAsync(buffer,{checkCRC32:true})}
+  catch(e){throw Error('Не удалось открыть Word-файл. Проверь, что это настоящий DOCX, а не старый DOC.')}
+  const entry=zip.file('word/document.xml');
+  if(!entry)throw Error('DOCX не содержит текста Word.');
+  if(Number(entry._data?.uncompressedSize)>8*1024*1024)throw Error('Документ слишком большой. Раздели вопросы на части.');
+  const xml=await entry.async('string');
+  if(xml.length>8*1024*1024)throw Error('Документ слишком большой. Раздели вопросы на части.');
+  return docxXmlToText(xml);
 }
-
 function docAnswerLine(line){
   const m=/^\s*(#\s*)?([ABCDАБВГ])\s*[\).:\-–—]\s*(.*?)\s*$/iu.exec(line);
   if(!m)return null;
