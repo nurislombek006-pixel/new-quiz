@@ -1,0 +1,52 @@
+/* QuizBot: streamlined subject form and aligned accordions on Telegram mobile. */
+body.admin-embedded #questions #subjectFold{margin:0 0 10px;border-radius:13px;background:#111f37;}
+body.admin-embedded #subjectsPane{padding-bottom:8px}
+body.admin-embedded #subjectsPane>.card{padding:11px;margin:9px 0 0;border-radius:12px}
+body.admin-embedded #subjectsPane .split-title{display:flex;align-items:center;justify-content:space-between;gap:9px}
+body.admin-embedded #subjectsPane .split-title h2{margin:0;font-size:14px;line-height:1.3}
+body.admin-embedded #subjectsPane .split-title button{padding:7px 9px;font-size:11px;white-space:nowrap}
+body.admin-embedded #subjectsList{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;min-width:0}
+body.admin-embedded .subject-chip{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;max-width:100%;padding:8px 10px;border:1px solid #334767;border-radius:11px;background:#16253f;color:#eaf2ff;text-align:left;font:500 12px/1.3 inherit;cursor:pointer}
+body.admin-embedded .subject-chip.selected{background:#1c3d78;border-color:#6294ec}
+body.admin-embedded .subject-chip-main{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.admin-embedded .subject-chip-count{flex:none;border-radius:6px;background:rgba(255,255,255,.08);padding:3px 5px;font-size:10px;color:#c2d1e5;white-space:nowrap}
+body.admin-embedded .subject-editor-heading h2{font-size:15px}
+body.admin-embedded #subjectsPane .subject-name-row{display:grid;grid-template-columns:minmax(0,1fr) 58px;gap:8px;align-items:center}
+body.admin-embedded #subjectsPane .subject-name-row input{width:100%;min-width:0;margin:0;height:41px;box-sizing:border-box}
+body.admin-embedded #subjectEmoji{text-align:center;padding:7px!important;font-size:19px!important}
+body.admin-embedded #subjectsPane label[for=subjectTitle]{display:block;font-size:12px;margin:10px 0 6px}
+body.admin-embedded #subjectEditorHint{margin:9px 1px;color:#a2b4cd;font-size:11px;line-height:1.4}
+body.admin-embedded .subject-editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:10px}
+body.admin-embedded .subject-editor-actions .btn{min-height:39px;flex:1 1 auto;line-height:1.2}
+body.admin-embedded .subject-editor-actions #subjectDeleteAction{flex:0 1 auto;min-width:90px}
+body.admin-embedded .subject-editor-actions .btn.hidden{display:none!important}
+body.admin-embedded #questions .compact-qstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+body.admin-embedded #questions .compact-qstats .stat{min-width:0;padding:10px 12px;min-height:65px;display:flex;flex-direction:column;justify-content:center}
+body.admin-embedded #questions .compact-qstats .stat b{font-size:19px!important;line-height:1.2;overflow-wrap:anywhere}
+body.admin-embedded #questions .compact-qstats .stat span{margin-top:4px;font-size:11px}
+/* Fixed-right toggle; no floating chevron, no line-wrap or clipping on iOS. */
+body.admin-embedded details.fold>summary{
+  display:block!important;position:relative!important;min-height:49px;
+  padding:12px 40px 12px 12px!important;
+  line-height:1.35!important;overflow:visible!important;
+  list-style:none!important;list-style-type:none!important;
+  cursor:pointer;
+}
+body.admin-embedded details.fold>summary::-webkit-details-marker{display:none!important}
+body.admin-embedded details.fold>summary::marker{content:""!important;font-size:0!important}
+body.admin-embedded details.fold>summary:after{
+  position:absolute!important;right:12px!important;top:50%!important;
+  transform:translateY(-50%)!important;float:none!important;
+  width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;background:#22334f;color:#c8d7ee;
+  font-size:16px!important;line-height:1!important;pointer-events:none;
+  content:"⌄"!important;
+}
+body.admin-embedded details.fold[open]>summary:after{content:"⌃"!important;}
+body.admin-embedded details.fold>summary .fold-hint{display:block!important;max-width:100%;margin:3px 0 0!important;padding:0;font-size:10px!important;line-height:1.35;color:#90a8c5}
+@media(max-width:420px){
+ body.admin-embedded #subjectsPane>.card{padding:10px}
+ body.admin-embedded .subject-chip{width:100%;padding:8px 9px}
+ body.admin-embedded #questions .compact-qstats .stat{min-height:60px}
+ body.admin-embedded details.fold>summary{padding:11px 38px 11px 10px!important}
+}
