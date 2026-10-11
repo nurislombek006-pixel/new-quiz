@@ -119,3 +119,31 @@ function manageUser(id){
   window.scrollTo({top:0,behavior:'smooth'});
   toast('Пользователь '+safe+' выбран для управления');
 }
+
+/* Keep advanced question import/export available without a long screen. */
+function compactQuestionControls(){
+  const controls=document.querySelector('#questions > .grid2');
+  if(!controls||controls.dataset.compactDone==='1')return;
+  controls.dataset.compactDone='1';
+  controls.classList.add('fold-stack');
+  const labels=[
+    ['📥 Импорт вопросов','Добавить вопросы из JSON'],
+    ['📤 Скачать вопросы','Экспортировать базу']
+  ];
+  Array.from(controls.children).forEach((card,index)=>{
+    const item=document.createElement('details');
+    item.className='fold question-fold';
+    const label=document.createElement('summary');
+    const hint=document.createElement('span');
+    hint.className='fold-hint';
+    label.textContent=labels[index]?.[0]||'Дополнительные действия';
+    hint.textContent=labels[index]?.[1]||'';
+    label.appendChild(hint);
+    item.appendChild(label);
+    item.appendChild(card);
+    controls.appendChild(item);
+  });
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',compactQuestionControls,{once:true});
+}else compactQuestionControls();
