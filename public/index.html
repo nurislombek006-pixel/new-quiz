@@ -319,7 +319,7 @@
   <link rel="stylesheet" href="./eco-final-patch.css?v=14"/>
 <link rel="stylesheet" href="./drawer-clarity.css?v=1"/>
 <link rel="stylesheet" href="./drawer-v2.css?v=1"/>
-<link rel="stylesheet" href="./ui-controls.css?v=1"/>
+<link rel="stylesheet" href="./ui-controls.css?v=2"/>
 </head>
 <body>
 <script>
@@ -459,19 +459,6 @@ setTimeout(function(){
         </div>
       </div>
 
-      <div class="setting-card scale-setting" id="ui-scale-setting">
-        <div class="ui-scale-header">
-          <label class="ui-scale-title" for="ui-scale-slider">🔍 Масштаб интерфейса</label>
-          <output class="ui-scale-value" id="ui-scale-value" for="ui-scale-slider">100%</output>
-        </div>
-        <div class="ui-scale-row">
-          <button type="button" class="ui-scale-adjust" id="ui-scale-minus" aria-label="Уменьшить масштаб">−</button>
-          <input type="range" class="ui-scale-slider" id="ui-scale-slider" min="60" max="180" step="5" value="100" aria-label="Масштаб интерфейса от 60 до 180 процентов">
-          <button type="button" class="ui-scale-adjust" id="ui-scale-plus" aria-label="Увеличить масштаб">+</button>
-        </div>
-        <div class="ui-scale-bottom"><span>60%</span><button type="button" class="ui-scale-reset" id="ui-scale-reset">Сбросить 100%</button><span>180%</span></div>
-      </div>
-
       <div class="mini-note compact-total">Всего в базе: <span id="total-count">—</span></div>
       <button class="btn btn-primary btn-full menu-main-btn" onclick="guardedStart()">Начать тест</button>
     </div>
@@ -562,6 +549,17 @@ setTimeout(function(){
       </div>
     </div>
     <button type="button" class="drawer-close qb-drawer-close" aria-label="Закрыть меню" onclick="closeDrawer()">×</button>
+  </div>
+  <div id="ui-scale-setting" class="ui-scale-drawer" aria-label="Масштаб текста">
+    <div class="ui-scale-heading">
+      <span class="ui-scale-title">МАСШТАБ ТЕКСТА</span>
+      <output id="ui-scale-value" class="ui-scale-value" aria-live="off">100%</output>
+    </div>
+    <div class="ui-scale-buttons">
+      <button id="ui-scale-minus" type="button" class="ui-scale-btn" aria-label="Уменьшить текст на 10 процентов">a−</button>
+      <button id="ui-scale-plus" type="button" class="ui-scale-btn" aria-label="Увеличить текст на 10 процентов">A+</button>
+      <button id="ui-scale-reset" type="button" class="ui-scale-btn" aria-label="Сбросить масштаб текста на 100 процентов">100%</button>
+    </div>
   </div>
   <div class="drawer-list qb-drawer-list" data-grouped="1">
     <section class="qb-drawer-section" aria-label="Обучение">
@@ -1529,6 +1527,6 @@ function waitForTelegram(maxMs=700){
 <script src="./eco-final-patch.js?v=30" defer></script>
 <script src="./admin-embed.js?v=7" defer></script>
 <script src="./activity-tracker.js?v=1" defer></script>
-<script src="./ui-scale.js?v=1" defer></script>
+<script src="./ui-scale.js?v=2" defer></script>
 </body>
 </html>
