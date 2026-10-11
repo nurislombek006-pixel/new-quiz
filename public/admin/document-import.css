@@ -1,0 +1,22 @@
+/* Accessible compact Word/TXT importer inside owner-only QuizBot admin. */
+body.admin-embedded .doc-import-card{border:1px solid #326b88;background:#10243b;}
+body.admin-embedded .doc-import-card label{display:block;font-size:12px;margin:12px 0 5px;color:#cbdcf3}
+body.admin-embedded .doc-import-card input[type=file]{width:100%;font-size:12px;max-width:100%;min-width:0;border:1px dashed #3f6590;background:#101c31;border-radius:11px;padding:11px;color:#b8cce5}
+body.admin-embedded .doc-import-card select{width:100%}
+body.admin-embedded .doc-import-example{background:#0a172a;border:1px solid #344564;border-radius:12px;padding:11px;margin:11px 0}
+body.admin-embedded .doc-import-example-heading{font-size:12px;color:#acd4fb;margin:0 0 7px}
+body.admin-embedded .doc-import-example pre{font:400 12px/1.48 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;margin:0 0 10px;color:#e6f0ff;overflow-wrap:anywhere}
+body.admin-embedded .doc-import-example .btn{font-size:11px}
+body.admin-embedded .doc-import-status{font-size:12px;margin:11px 0;line-height:1.5}
+body.admin-embedded .doc-import-status[data-status=ok]{color:#87e7bd}
+body.admin-embedded .doc-import-status[data-status=error]{color:#ffacac}
+body.admin-embedded .doc-import-preview{display:grid;gap:8px;max-height:340px;overflow:auto;scrollbar-width:thin;margin:12px 0}
+body.admin-embedded .doc-import-preview p{margin:5px 0}
+body.admin-embedded .doc-import-question{border:1px solid #304463;background:#0b1a2f;border-radius:10px;padding:10px;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+body.admin-embedded .doc-import-question-title{font-weight:600!important;margin:0 0 6px}
+body.admin-embedded .doc-import-right{color:#88e6b0;font-weight:600!important}
+body.admin-embedded .doc-import-error{background:#532332;border-left:3px solid #f87171;color:#ffe0e0;padding:7px 9px;border-radius:5px;font-size:12px}
+body.admin-embedded .doc-import-errors{color:#ffc8cb;font-size:12px}
+body.admin-embedded #docImportSave{min-height:43px;margin-top:7px}
+body.admin-embedded #docImportSave:disabled{opacity:.48;cursor:not-allowed}
+body.admin-embedded .doc-import-note{margin-top:9px;color:#a6b8d0}
