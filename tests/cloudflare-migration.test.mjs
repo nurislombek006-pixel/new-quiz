@@ -75,7 +75,7 @@ test('Full original UI is in Cloudflare and admin owner can migrate old Netlify 
  assert.match(migration,/oldExport\('\/api\/admin\/export'/);
  assert.match(migration,/Number\(latest.total\)!==count/);
  assert.match(migration,/confirm\(/);
- assert.match(migration,/report/);
+ assert.match(migration,/Токен бота отчётов/);
  assert.match(worker,/apiHandler\(request,env\)/);
  assert.equal(config.d1_databases[0].binding,'DB');
  assert.equal(config.d1_databases[0].database_name,'quizbot-astor-data');
