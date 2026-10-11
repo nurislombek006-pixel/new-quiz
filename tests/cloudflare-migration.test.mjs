@@ -101,7 +101,7 @@ test('Compact study header and normal-weight typography preserve UI actions',()=
   assert.match(index,/id="list-title"/);
   assert.match(index,/onclick="backToMenu\(\)"/);
   assert.match(assetMap['/index.html'],/soft-type\.css\?v=2/);
-  assert.match(assetMap['/admin/index.html'],/soft-type\.css\?v=1/);
+  assert.match(assetMap['/admin/index.html'],/soft-type\.css\?v=2/);
   assert.match(assetMap['/admin/index.html'],/id="migrate-old-site"/);
   assert.equal(assetMap['/soft-type.css'],css);
   assert.equal(assetMap['/admin/soft-type.css'],adminCss);
