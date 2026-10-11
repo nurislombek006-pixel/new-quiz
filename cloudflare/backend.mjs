@@ -817,16 +817,34 @@ async function handleAdmin(request, env, path){
         body.short || oldSub.short || body.title || key,
         body.emoji || oldSub.emoji || '📚'
       );
-      const append = body.mode === 'append' || body.append === true;
+      const uniqueAppend = body.mode === 'append_unique';
+      const append = uniqueAppend || body.mode === 'append' || body.append === true;
+      const previousTests = Array.isArray(oldSub.tests) ? oldSub.tests : [];
+      const submittedTests = Array.isArray(payload.tests) ? payload.tests : [];
+      let additions = submittedTests;
+      let skippedDuplicates = 0;
+      if(uniqueAppend){
+        const identity=q=>JSON.stringify([
+          String(q?.question||'').replace(/\s+/g,' ').trim().toLowerCase(),
+          (Array.isArray(q?.options)?q.options:[]).map(x=>String(x).replace(/\s+/g,' ').trim().toLowerCase())
+        ]);
+        const seen=new Set(previousTests.map(identity));
+        additions=[];
+        for(const q of submittedTests){
+          const id=identity(q);
+          if(seen.has(id)){skippedDuplicates++;continue}
+          seen.add(id);additions.push(q);
+        }
+      }
       current.subjects[key] = {
         title: body.title || payload.title || oldSub.title || key,
         short: body.short || payload.short || body.title || oldSub.short || payload.title || key,
         emoji: body.emoji || payload.emoji || oldSub.emoji || '📚',
-        tests: append ? [ ...(Array.isArray(oldSub.tests) ? oldSub.tests : []), ...(payload.tests || []) ] : (payload.tests || [])
+        tests: append ? [...previousTests,...additions] : submittedTests
       };
       current.data_version = body.data_version || current.data_version || 'custom-subjects';
       const saved = await saveTestsData(env, current);
-      return adminJson(request,{ok:true, action: append ? 'subject_questions_appended' : 'subject_questions_imported', subject_key:key, key:TESTS_KEY, meta:saved.meta, counts:countTestsData(saved.data)});
+      return adminJson(request,{ok:true, action: append ? 'subject_questions_appended' : 'subject_questions_imported', subject_key:key, added:append?additions.length:submittedTests.length, skipped_duplicates:skippedDuplicates, key:TESTS_KEY, meta:saved.meta, counts:countTestsData(saved.data)});
     }
 
     // Без subject_key — импортируем весь JSON как раньше.
