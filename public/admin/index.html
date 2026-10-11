@@ -20,6 +20,7 @@ body.admin-embedded .top{margin-bottom:10px}
 body.admin-embedded .card{margin:9px 0}
 </style>
 <link rel="stylesheet" href="./compact.css?v=1">
+<link rel="stylesheet" href="./quick-actions.css?v=1">
 </head>
 <body>
 <div class="wrap">
@@ -77,6 +78,33 @@ body.admin-embedded .card{margin:9px 0}
   </section>
 
   <div id="access" class="pane">
+    <div class="card quick-access-card">
+      <div class="quick-header">
+        <h2>⚡ Быстрые действия</h2>
+        <p class="mini">Один Telegram ID — все основные действия.</p>
+      </div>
+      <label for="quickUserId">Telegram ID пользователя</label>
+      <input id="quickUserId" inputmode="numeric" autocomplete="off" placeholder="Вставь Telegram ID">
+      <div class="quick-duration">
+        <label for="quickDays">Срок Premium</label>
+        <select id="quickDays">
+          <option value="7">7 дней</option>
+          <option value="30" selected>30 дней</option>
+          <option value="90">90 дней</option>
+          <option value="365">1 год</option>
+          <option value="0">Без срока</option>
+        </select>
+      </div>
+      <div class="quick-actions">
+        <button type="button" class="btn green" data-quick-main="premium" onclick="quickUserAction('premium')">💎 Выдать Premium</button>
+        <button type="button" class="btn" data-quick-main="remove" onclick="quickUserAction('remove')">Снять Premium</button>
+        <button type="button" class="btn red" data-quick-main="ban" onclick="quickUserAction('ban')">🚫 Забанить</button>
+        <button type="button" class="btn" data-quick-main="unban" onclick="quickUserAction('unban')">Разбанить</button>
+      </div>
+      <div class="mini quick-note">Можно выбрать пользователя во вкладке «Люди» — ID подставится автоматически.</div>
+    </div>
+    <details class="fold" id="accessAdvanced">
+      <summary>⚙️ Дополнительные параметры <span class="fold-hint">Особые сроки, причины бана, привязка к устройству</span></summary>
     <div class="grid2">
       <div class="card">
         <h2>💎 Выдать Premium</h2>
@@ -97,6 +125,7 @@ body.admin-embedded .card{margin:9px 0}
         <div class="row" style="margin-top:12px"><button class="btn red" onclick="banUser()">Забанить</button><button class="btn green" onclick="unbanUser()">Разбанить</button></div>
       </div>
     </div>
+    </details>
     <details class="fold dangerous"><summary>⚠️ Массовые действия</summary><div class="card danger">
       <h2>🧹 Убрать премиум у всех</h2>
       <div class="mini">Баны не удаляются.</div>
@@ -105,6 +134,30 @@ body.admin-embedded .card{margin:9px 0}
   </div>
 
   <div id="questions" class="pane">
+    <div class="card quick-question-card">
+      <div class="quick-header">
+        <h2>➕ Добавить вопрос</h2>
+        <p class="mini">Без JSON. Старые вопросы сохраняются.</p>
+      </div>
+      <form id="quickQuestionForm" onsubmit="quickAddQuestion(event)">
+        <label for="quickSubject">Предмет</label>
+        <select id="quickSubject" required aria-label="Выбрать предмет"></select>
+        <label for="quickQuestion">Вопрос</label>
+        <textarea id="quickQuestion" rows="2" required maxlength="2000" placeholder="Например: Что такое инфляция?"></textarea>
+        <div class="quick-option-grid">
+          <div><label for="quickOption0">Ответ 1</label><input id="quickOption0" required maxlength="1000" placeholder="Первый вариант"></div>
+          <div><label for="quickOption1">Ответ 2</label><input id="quickOption1" required maxlength="1000" placeholder="Второй вариант"></div>
+          <div><label for="quickOption2">Ответ 3</label><input id="quickOption2" required maxlength="1000" placeholder="Третий вариант"></div>
+          <div><label for="quickOption3">Ответ 4</label><input id="quickOption3" required maxlength="1000" placeholder="Четвёртый вариант"></div>
+        </div>
+        <label for="quickCorrect">Правильный ответ</label>
+        <select id="quickCorrect" required>
+          <option value="0">Ответ 1</option><option value="1">Ответ 2</option>
+          <option value="2">Ответ 3</option><option value="3">Ответ 4</option>
+        </select>
+        <button id="quickQuestionSave" type="submit" class="btn green full quick-save">✓ Сохранить вопрос</button>
+      </form>
+    </div>
     <div class="card">
       <div class="split-title"><h2>📝 Вопросы</h2><button class="btn" onclick="questionsInfo()">Количество</button></div>
       <div class="statgrid" id="qStats"><div class="stat"><b>—</b><span>вопросов</span></div><div class="stat"><b>—</b><span>предметов</span></div><div class="stat"><b>—</b><span>версия</span></div></div>
@@ -242,5 +295,6 @@ async function initializeEmbeddedAdmin(){
 }
 initializeEmbeddedAdmin();
 </script>
+<script src="./quick-actions.js?v=1"></script>
 </body>
 </html>

@@ -146,7 +146,7 @@
     window.showScreen('admin-screen');
     hideSubjectOnAdmin();
     const iframe=document.getElementById('owner-admin-frame');
-    if(iframe&&!iframe.getAttribute('src'))iframe.src='/admin/index.html?embedded=1&v=4';
+    if(iframe&&!iframe.getAttribute('src'))iframe.src='/admin/index.html?embedded=1&v=5';
   }
 
   function insertMenu(){

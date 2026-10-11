@@ -79,7 +79,9 @@
     const p=isPremium();
     el.classList.remove('hidden');
     el.classList.toggle('ordinary',!p);
-    el.textContent=p?'Премиум пользователь':'Обычный пользователь';
+    el.textContent=p?'PRO':'Free';
+    el.setAttribute('aria-label',p?'Премиум пользователь':'Обычный пользователь');
+    el.title=p?'Premium активен':'Бесплатный доступ';
   }
   function usageRecords(){
     let a=[];try{a=JSON.parse(localStorage.getItem(USAGE_KEY)||'[]')}catch(e){}

@@ -28,11 +28,11 @@
     .icon-btn{border:1px solid rgba(255,255,255,.28);background:rgba(15,23,42,.55);color:#fff;border-radius:15px;min-width:44px;min-height:44px;font-weight:1000;cursor:pointer;box-shadow:0 6px 15px rgba(0,0,0,.14)}
     .top-right{display:flex;align-items:center;gap:8px}
     /* Premium badge */
-    .premium-badge{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:7px 10px;border-radius:999px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111827;font-size:11px;font-weight:1000;box-shadow:0 8px 20px rgba(245,158,11,.25);white-space:nowrap}
-    .premium-badge::before{content:"👑";margin-right:4px}
-    .premium-badge.ordinary{background:linear-gradient(135deg,#334155,#475569);color:#cbd5e1;box-shadow:none}
-    .premium-badge.ordinary::before{content:"👤"}
-    @media(max-width:420px){.premium-badge{font-size:0;padding:7px 9px;min-width:38px}.premium-badge::before{font-size:17px;margin-right:0}}
+    .premium-badge{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:27px;max-width:92px;padding:4px 8px;border-radius:999px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111827;font-size:11px;font-weight:900;box-shadow:0 4px 12px rgba(245,158,11,.18);white-space:nowrap;letter-spacing:.15px;flex-shrink:0}
+    .premium-badge::before{content:"💎";font-size:12px;line-height:1}
+    .premium-badge.ordinary{background:#334155;color:#f1f5f9;box-shadow:none;border:1px solid rgba(203,213,225,.22)}
+    .premium-badge.ordinary::before{content:"○";font-size:11px}
+    @media(max-width:420px){.premium-badge{font-size:10px;min-width:0;padding:4px 7px;gap:3px}.premium-badge::before{font-size:11px}}
     /* Card */
     .card{background:rgba(255,255,255,.95);border:1px solid rgba(226,232,240,.9);border-radius:24px;box-shadow:0 16px 42px rgba(31,41,55,.14);padding:14px;width:100%;transition:.25s}
     .light .card{background:rgba(255,255,255,.96)}
@@ -736,8 +736,10 @@ function activateKeyCode(){openActivationPanel()}
 function updatePremiumBadge(isPremium){
   const el=document.getElementById('premium-badge');if(!el)return;
   el.classList.remove('hidden','ordinary');
-  if(isPremium){el.textContent='Премиум пользователь';el.style.display=''}
-  else{el.textContent='Обычный пользователь';el.classList.add('ordinary');}
+  el.classList.toggle('ordinary',!isPremium);
+  el.textContent=isPremium?'PRO':'Free';
+  el.setAttribute('aria-label',isPremium?'Премиум пользователь':'Обычный пользователь');
+  el.title=isPremium?'Premium активен':'Бесплатный доступ';
 }
 async function refreshPremiumBadge(){
   try{await loadLists();}catch(e){}
@@ -1411,7 +1413,7 @@ function waitForTelegram(maxMs=700){
 </script>
 <script src="./eco-upgrade.js?v=30" defer></script>
 <script src="./eco-final-patch.js?v=30" defer></script>
-<script src="./admin-embed.js?v=6" defer></script>
+<script src="./admin-embed.js?v=7" defer></script>
 <script src="./activity-tracker.js?v=1" defer></script>
 </body>
 </html>

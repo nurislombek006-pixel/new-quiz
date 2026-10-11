@@ -95,8 +95,11 @@ function renderUsers(){
         '</div><div class="person-handle">'+handle+'</div></div><span class="person-status">'+status+'</span></div>'+
         '<div class="person-id">Telegram ID: '+escapeHtml(u.id)+'</div>'+
         '<div class="person-time">'+recent+'<div>Последний вход: '+escapeHtml(activityTime(u.last_opened||u.first_seen))+'</div><div>Последняя активность: '+escapeHtml(activityTime(u.last_seen))+'</div></div>'+
+        '<div class="person-controls">'+
+        '<button type="button" class="btn btn-user-premium" data-user-action="'+(u.premium?'remove':'premium')+'" data-user-id="'+escapeHtml(u.id)+'">'+(u.premium?'Снять 💎':'💎 +30 дней')+'</button>'+
+        '<button type="button" class="btn '+(u.banned?'btn-user-unban':'btn-user-ban')+'" data-user-action="'+(u.banned?'unban':'ban')+'" data-user-id="'+escapeHtml(u.id)+'">'+(u.banned?'Разбанить':'🚫 Бан')+'</button></div>'+
         '<div class="person-foot"><span class="person-status">Открытий: '+Math.max(0,Number(u.opens)||0)+'</span>'+
-        '<button type="button" class="btn compact" data-manage-user="'+escapeHtml(u.id)+'">Управлять ↗</button></div></div>';
+        '<button type="button" class="btn compact" data-manage-user="'+escapeHtml(u.id)+'">Ещё ↗</button></div></div>';
     }).join('');
   }
   root.querySelectorAll('[data-manage-user]').forEach(button=>{
@@ -115,6 +118,8 @@ function manageUser(id){
   if(!safe)return;
   document.getElementById('premId').value=safe;
   document.getElementById('banId').value=safe;
+  const quick=document.getElementById('quickUserId');
+  if(quick)quick.value=safe;
   showPane('access');
   window.scrollTo({top:0,behavior:'smooth'});
   toast('Пользователь '+safe+' выбран для управления');
