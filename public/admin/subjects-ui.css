@@ -6,7 +6,7 @@ body.admin-embedded #subjectsPane .split-title{display:flex;align-items:center;j
 body.admin-embedded #subjectsPane .split-title h2{margin:0;font-size:14px;line-height:1.3}
 body.admin-embedded #subjectsPane .split-title button{padding:7px 9px;font-size:11px;white-space:nowrap}
 body.admin-embedded #subjectsList{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;min-width:0}
-body.admin-embedded .subject-chip{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;max-width:100%;padding:8px 10px;border:1px solid #334767;border-radius:11px;background:#16253f;color:#eaf2ff;text-align:left;font:500 12px/1.3 inherit;cursor:pointer}
+body.admin-embedded .subject-chip{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;max-width:100%;padding:8px 10px;border:1px solid #334767;border-radius:11px;background:#16253f;color:#eaf2ff;text-align:left;font-weight:500;font-size:12px;line-height:1.3;font-family:inherit;cursor:pointer}
 body.admin-embedded .subject-chip.selected{background:#1c3d78;border-color:#6294ec}
 body.admin-embedded .subject-chip-main{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 body.admin-embedded .subject-chip-count{flex:none;border-radius:6px;background:rgba(255,255,255,.08);padding:3px 5px;font-size:10px;color:#c2d1e5;white-space:nowrap}
