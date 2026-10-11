@@ -19,11 +19,12 @@ body.admin-embedded #admin-login-card{display:none!important}
 body.admin-embedded .top{margin-bottom:10px}
 body.admin-embedded .card{margin:9px 0}
 </style>
+<link rel="stylesheet" href="./compact.css?v=1">
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <div><h1>QuizBot Admin</h1><div class="sub">Премиум, бан, предметы, вопросы и отчёты. Device lock убран — для привязки используй fingerprint в премиуме.</div></div>
+    <div><h1>Управление</h1><div class="sub">QuizBot · только для владельца</div></div>
     <div class="status" id="status"><span class="bad">●</span> не подключено</div>
   </div>
 
@@ -42,18 +43,43 @@ body.admin-embedded .card{margin:9px 0}
     <div id="advanced" class="advanced hidden"><div class="row"><button class="btn" onclick="health()">Проверить backend</button><button class="btn yellow" onclick="initAccess()">Подготовить базу</button></div></div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="showPane('access',this)">Доступ</button>
-    <button class="tab" onclick="showPane('subjectsPane',this)">Предметы</button>
-    <button class="tab" onclick="showPane('questions',this)">Вопросы</button>
-    <button class="tab" onclick="showPane('reports',this)">Отчёты</button>
-    <button class="tab" onclick="showPane('lists',this)">Списки</button>
-  </div>
+  <nav class="tabs" aria-label="Разделы панели">
+    <button type="button" class="tab active" data-pane="users" onclick="showPane('users',this)"><span class="tab-icon">👥</span>Люди</button>
+    <button type="button" class="tab" data-pane="access" onclick="showPane('access',this)"><span class="tab-icon">💎</span>Доступ</button>
+    <button type="button" class="tab" data-pane="questions" onclick="showPane('questions',this)"><span class="tab-icon">📚</span>Вопросы</button>
+    <button type="button" class="tab" data-pane="settings" onclick="showPane('settings',this)"><span class="tab-icon">⚙️</span>Ещё</button>
+  </nav>
 
-  <div id="access" class="pane active">
+  <section id="users" class="pane active" aria-label="Пользователи QuizBot">
+    <div class="section-intro">
+      <h2>👥 Пользователи QuizBot</h2>
+      <button type="button" class="btn compact" onclick="refreshUsers()">↻ Обновить</button>
+    </div>
+    <div class="mini activity-note">Активность только в этом мини-приложении. Данные появляются с момента включения учёта; время Telegram «в сети» не отслеживается.</div>
+    <div class="statgrid people-stats" id="userStats">
+      <div class="stat"><b>—</b><span>Посетили</span></div>
+      <div class="stat"><b>—</b><span>За 24 часа</span></div>
+      <div class="stat"><b>—</b><span>Недавно</span></div>
+    </div>
+    <div class="people-toolbar">
+      <input type="search" id="userSearch" placeholder="Поиск по ID, имени, @username" autocomplete="off" oninput="renderUsers()">
+      <select id="userFilter" aria-label="Фильтр пользователей" onchange="renderUsers()">
+        <option value="all">Все пользователи</option>
+        <option value="recent">Недавно активные</option>
+        <option value="today">За последние 24 часа</option>
+        <option value="premium">С Premium</option>
+        <option value="banned">Заблокированные</option>
+      </select>
+    </div>
+    <div id="userList" class="people-list"><div class="empty">Загрузка пользователей…</div></div>
+    <button type="button" class="btn compact full hidden" id="usersMore" onclick="showMoreUsers()">Показать ещё</button>
+    <div id="userCountNote" class="mini" aria-live="polite"></div>
+  </section>
+
+  <div id="access" class="pane">
     <div class="grid2">
       <div class="card">
-        <h2>⭐ Премиум</h2>
+        <h2>💎 Выдать Premium</h2>
         <label>Telegram ID</label><input id="premId" inputmode="numeric" placeholder="5305261101">
         <div class="grid2"><div><label>Дней</label><input id="premDays" type="number" min="0" value="30"></div><div><label>Дата окончания, необязательно</label><input id="premExpires" type="date"></div></div>
         <label>Fingerprint, необязательно</label><input id="premFp" placeholder="45A2C438">
@@ -62,36 +88,18 @@ body.admin-embedded .card{margin:9px 0}
         <div class="mini">Если fingerprint пустой — премиум работает на любом устройстве. Если заполнен — только на этом устройстве.</div>
       </div>
       <div class="card danger">
-        <h2>🚫 Бан</h2>
+        <h2>🚫 Заблокировать</h2>
         <label>Telegram ID</label><input id="banId" inputmode="numeric" placeholder="5305261101">
         <label>Описание для пользователя</label><textarea id="banReason">Вы использовали читы</textarea>
         <label>До даты, необязательно</label><input id="banUntil" type="date">
         <div class="row" style="margin-top:12px"><button class="btn red" onclick="banUser()">Забанить</button><button class="btn green" onclick="unbanUser()">Разбанить</button></div>
       </div>
     </div>
-    <div class="card danger">
+    <details class="fold dangerous"><summary>⚠️ Массовые действия</summary><div class="card danger">
       <h2>🧹 Убрать премиум у всех</h2>
       <div class="mini">Баны не удаляются.</div>
       <button class="btn red" onclick="clearAllPremium()">Убрать премиум у всех</button>
-    </div>
-  </div>
-
-  <div id="subjectsPane" class="pane">
-    <div class="card">
-      <div class="split-title"><h2>📚 Предметы</h2><button class="btn" onclick="questionsInfo()">Обновить</button></div>
-      <div id="subjectsList" class="mini">Список появится после подключения.</div>
-    </div>
-    <div class="card">
-      <h2>➕ Добавить / изменить предмет</h2>
-      <div class="grid3">
-        <div><label>Ключ предмета</label><input id="subjectKey" placeholder="marketing"></div>
-        <div><label>Полное название</label><input id="subjectTitle" placeholder="Маркетинг"></div>
-        <div><label>Короткое название</label><input id="subjectShort" placeholder="Маркетинг"></div>
-      </div>
-      <label>Эмодзи</label><input id="subjectEmoji" placeholder="📚" maxlength="4">
-      <div class="row" style="margin-top:12px"><button class="btn green" onclick="saveSubjectName()">Сохранить предмет</button><button class="btn red" onclick="deleteSubject()">Удалить предмет</button></div>
-      <div class="mini">Ключ лучше латиницей: marketing, macro, micro, finance. Его видно только в базе.</div>
-    </div>
+    </div></details>
   </div>
 
   <div id="questions" class="pane">
@@ -116,9 +124,33 @@ body.admin-embedded .card{margin:9px 0}
         <button class="btn purple full" onclick="downloadLastQuestions()">Скачать JSON</button>
       </div>
     </div>
+    <details class="fold" id="subjectFold"><summary>📚 Управление предметами <span class="fold-hint">Добавить, изменить или удалить</span></summary>
+  <div id="subjectsPane">
+    <div class="card">
+      <div class="split-title"><h2>📚 Предметы</h2><button class="btn" onclick="questionsInfo()">Обновить</button></div>
+      <div id="subjectsList" class="mini">Список появится после подключения.</div>
+    </div>
+    <div class="card">
+      <h2>➕ Добавить / изменить предмет</h2>
+      <div class="grid3">
+        <div><label>Ключ предмета</label><input id="subjectKey" placeholder="marketing"></div>
+        <div><label>Полное название</label><input id="subjectTitle" placeholder="Маркетинг"></div>
+        <div><label>Короткое название</label><input id="subjectShort" placeholder="Маркетинг"></div>
+      </div>
+      <label>Эмодзи</label><input id="subjectEmoji" placeholder="📚" maxlength="4">
+      <div class="row" style="margin-top:12px"><button class="btn green" onclick="saveSubjectName()">Сохранить предмет</button><button class="btn red" onclick="deleteSubject()">Удалить предмет</button></div>
+      <div class="mini">Ключ лучше латиницей: marketing, macro, micro, finance. Его видно только в базе.</div>
+    </div>
   </div>
 
-  <div id="reports" class="pane">
+    </details>
+  </div>
+
+  <section id="settings" class="pane" aria-label="Дополнительные настройки">
+    <h2 class="settings-heading">⚙️ Дополнительно</h2>
+    <p class="mini settings-note">Здесь редкие операции. Основные действия — во вкладках выше.</p>
+    <details class="fold"><summary>📨 Отчёты бота <span class="fold-hint">Настроить уведомления</span></summary>
+  <div id="reports">
     <div class="card">
       <h2>📨 Отчёты</h2>
       <div class="grid2"><div><label>Bot token для отчётов</label><input id="reportToken" placeholder="123456:ABC..."></div><div><label>Telegram ID / Chat ID получателя</label><input id="reportChatId" placeholder="5305261101"></div></div>
@@ -128,15 +160,20 @@ body.admin-embedded .card{margin:9px 0}
     </div>
   </div>
 
-  <div id="lists" class="pane">
+    </details>
+    <details class="fold"><summary>📋 Списки и технический ответ <span class="fold-hint">Premium, блокировки и данные сервера</span></summary>
+  <div id="lists">
     <div class="grid2">
       <div class="card"><h2>⭐ Премиум</h2><div id="premiumList" class="list"><div class="empty">Пусто</div></div></div>
       <div class="card"><h2>🚫 Бан</h2><div id="banList" class="list"><div class="empty">Пусто</div></div></div>
     </div>
     <div class="card"><h2>Ответ backend</h2><div class="row"><button class="btn" onclick="copyResult()">Копировать</button></div><div class="result" id="result">Ответы будут здесь.</div></div>
-  </div>
+  </div>    </details>
+  </section>
+
 </div>
 <div class="toast" id="toast"></div>
+<script src="./compact.js?v=1"></script>
 <script>
 const $=id=>document.getElementById(id);let lastExport=null;let subjectsMeta=[];
 function apiBase(){return location.origin}function secret(){return ''}function ownerInitData(){
@@ -146,7 +183,7 @@ function apiBase(){return location.origin}function secret(){return ''}function o
   }catch(e){return ''}
 }function cleanId(v){return String(v||'').replace(/\D+/g,'')}function slug(v){return String(v||'').trim().toLowerCase().replace(/[^a-z0-9а-яё_-]+/gi,'-').replace(/^-+|-+$/g,'')}
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2600)}function setStatus(t,ok){$('status').innerHTML=`<span class="${ok?'ok':'bad'}">●</span> ${t}`}function out(d){$('result').textContent=typeof d==='string'?d:JSON.stringify(d,null,2)}function toggleAdvanced(){$('advanced').classList.toggle('hidden')}
-function showPane(id,btn){document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));$(id).classList.add('active');btn.classList.add('active')}
+function showPane(id,btn){document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));$(id)?.classList.add('active');(btn||document.querySelector('.tab[data-pane="'+id+'"]'))?.classList.add('active');if(id==='users'&&window.refreshUsers)refreshUsers()}
 function loadSettings(){$('backend').value=localStorage.getItem('ep_admin_backend')||location.origin;$('secret').value=localStorage.getItem('ep_admin_secret')||''}async function saveSettings(auto){localStorage.setItem('ep_admin_backend',apiBase());localStorage.setItem('ep_admin_secret',secret());toast('Сохранено');if(auto){await health().catch(()=>{});await refreshAll().catch(()=>{})}}
 async function req(path,method='GET',body=null){if(!apiBase())throw new Error('Backend URL пустой');const initData=ownerInitData();if(!initData)throw new Error('Откройте админку из Telegram Mini App');const opt={method,headers:{'X-Telegram-Init-Data':initData}};if(body){opt.headers['Content-Type']='application/json';opt.body=JSON.stringify(body)}const r=await fetch(apiBase()+path,opt);const text=await r.text();let data;try{data=JSON.parse(text)}catch(e){data={raw:text}}setStatus(r.status+' '+(r.ok?'OK':'ERROR'),r.ok);out(data);if(!r.ok){toast(data.error||'Ошибка');throw new Error(data.error||text||r.statusText)}toast('Готово');return data}
 async function health(){const r=await fetch(apiBase()+'/api/health');const data=await r.json().catch(()=>({status:r.status}));setStatus(r.status+' '+(r.ok?'OK':'ERROR'),r.ok);out(data);return data}async function initAccess(){await req('/api/admin/init','POST',{force:false});await refreshLists(false)}async function refreshAll(){await questionsInfo().catch(()=>{});await loadReportSettings().catch(()=>{});await refreshLists(false).catch(()=>{})}
@@ -196,7 +233,7 @@ async function initializeEmbeddedAdmin(){
     if(!result?.admin){deny('Сервер не подтвердил доступ.');return;}
     document.body.classList.add('admin-embedded');
     document.documentElement.classList.remove('admin-embed-pending');
-    await refreshAll();
+    await Promise.all([refreshAll(),window.refreshUsers?refreshUsers():Promise.resolve()]);
   }catch(error){
     deny('Ошибка проверки доступа. Проверьте подключение и откройте страницу заново.');
   }
