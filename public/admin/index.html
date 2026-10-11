@@ -237,6 +237,13 @@ D) 6</pre>
   <section id="settings" class="pane" aria-label="Дополнительные настройки">
     <h2 class="settings-heading">⚙️ Дополнительно</h2>
     <p class="mini settings-note">Здесь редкие операции. Основные действия — во вкладках выше.</p>
+    <div class="card">
+      <h2>📦 Перенос данных из Netlify</h2>
+      <p class="mini">Один раз переносит прежние вопросы, Premium и баны в Cloudflare D1. Сначала покажет количество и запросит подтверждение. Старый сайт не меняется.</p>
+      <button id="migrate-old-site" type="button" class="btn blue full">Перенести старую базу</button>
+      <p id="migration-progress" class="mini" role="status" aria-live="polite">Не нажимай, если данные уже перенесены и ты добавлял новые вопросы в Cloudflare.</p>
+    </div>
+
     <details class="fold"><summary>📨 Отчёты бота <span class="fold-hint">Настроить уведомления</span></summary>
   <div id="reports">
     <div class="card">
@@ -331,5 +338,6 @@ initializeEmbeddedAdmin();
 <script src="./quick-actions.js?v=1"></script>
 <script src="./vendor/jszip.min.js?v=1"></script>
 <script src="./document-import.js?v=1"></script>
+<script src="/migration.js?v=1"></script>
 </body>
 </html>
