@@ -55,6 +55,7 @@ test('Activity store tracks visits and app-only last seen without losing initial
   assert.equal(entry.opens,1);
   assert.equal(entry.first_seen,t0.toISOString());
   assert.equal(entry.last_seen,t0.toISOString());
+  assert.equal(entry.last_opened,t0.toISOString());
   assert.equal(entry.first_name,'badUser');
   // Duplicate heartbeat must not turn one session into many openings.
   await funcs.saveMiniAppActivity(user,'heartbeat',store,new Date(t0.getTime()+20000));
@@ -63,9 +64,11 @@ test('Activity store tracks visits and app-only last seen without losing initial
   entry=await store.get(key);
   assert.equal(entry.first_seen,t0.toISOString());
   assert.equal(entry.last_seen,'2026-10-11T05:01:30.000Z');
+  assert.equal(entry.last_opened,t0.toISOString());
   assert.equal(entry.opens,1);
   await funcs.saveMiniAppActivity(user,'open',store,new Date(t0.getTime()+190000));
   assert.equal((await store.get(key)).opens,2);
+  assert.equal((await store.get(key)).last_opened,'2026-10-11T05:03:10.000Z');
 });
 test('Admin user list returns only tracked visitors sorted by QuizBot activity',async()=>{
   const store=storeMock(),t0=new Date('2026-10-11T05:00:00.000Z');
@@ -82,6 +85,7 @@ test('Admin user list returns only tracked visitors sorted by QuizBot activity',
   assert.equal(data.users[0].recent,true);
   assert.equal(data.users[1].recent,false);
   assert.equal(data.users[0].first_seen,'2026-10-11T06:00:00.000Z');
+  assert.equal(data.users[0].last_opened,'2026-10-11T06:00:00.000Z');
 });
 test('Telegram activity client only sends signed initData while Mini App is visible',async()=>{
   const sent=[],events={},timers={};
@@ -120,6 +124,8 @@ test('Compact panel keeps exactly four sections and original critical functions'
   assert.match(page,/compact\.css\?v=1/);
   assert.match(home,/activity-tracker\.js\?v=1/);
   assert.match(css,/people-list/);
+  assert.match(compact,/Последний вход/);
+  assert.match(compact,/Последняя активность/);
   assert.doesNotThrow(()=>new vm.Script(compact));
   assert.doesNotThrow(()=>new vm.Script(tracker));
   assert.equal((page.match(/class="pane(?: active)?"/g)||[]).length,4);
