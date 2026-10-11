@@ -63,6 +63,7 @@ function renderUsers(){
   const note=document.getElementById('userCountNote');
   const more=document.getElementById('usersMore');
   if(!root||!note||!more)return;
+  const expanded=new Set(Array.from(root.querySelectorAll('details.person[open]')).map(el=>el.dataset.personId));
   const search=String(document.getElementById('userSearch')?.value||'')
     .toLowerCase().trim().replace(/^@/,'');
   const filter=document.getElementById('userFilter')?.value||'all';
@@ -83,6 +84,7 @@ function renderUsers(){
       'Пока нет посещений. Пользователи появятся после открытия QuizBot.')+'</div>';
   }else{
     root.innerHTML=visible.map(u=>{
+      const id=escapeHtml(u.id);
       const name=escapeHtml([u.first_name,u.last_name].filter(Boolean).join(' ')||'Пользователь');
       const handle=u.username?'@'+escapeHtml(u.username):'Без username';
       const status=u.banned?
@@ -91,15 +93,18 @@ function renderUsers(){
       const recent=recentlyInApp(u)?
         '<span class="status-recent">● Недавно в QuizBot</span>':
         'Был в QuizBot: '+escapeHtml(activityAge(u.last_seen));
-      return '<div class="person"><div class="person-head"><div><div class="person-name">'+name+
-        '</div><div class="person-handle">'+handle+'</div></div><span class="person-status">'+status+'</span></div>'+
-        '<div class="person-id">Telegram ID: '+escapeHtml(u.id)+'</div>'+
-        '<div class="person-time">'+recent+'<div>Последний вход: '+escapeHtml(activityTime(u.last_opened||u.first_seen))+'</div><div>Последняя активность: '+escapeHtml(activityTime(u.last_seen))+'</div></div>'+
+      return '<details class="person" data-person-id="'+id+'"'+(expanded.has(String(u.id))?' open':'')+'>'+
+        '<summary class="person-summary"><span class="person-identity"><span class="person-name">'+name+'</span>'+
+        '<span class="person-handle">'+handle+'</span><span class="person-id">ID: '+id+'</span></span>'+
+        '<span class="person-summary-right"><span class="person-status">'+status+'</span><span class="person-chevron" aria-hidden="true">⌄</span></span></summary>'+
+        '<div class="person-detail"><div class="person-time">'+recent+
+        '<div>Последний вход: '+escapeHtml(activityTime(u.last_opened||u.first_seen))+'</div>'+
+        '<div>Последняя активность: '+escapeHtml(activityTime(u.last_seen))+'</div></div>'+
         '<div class="person-controls">'+
-        '<button type="button" class="btn btn-user-premium" data-user-action="'+(u.premium?'remove':'premium')+'" data-user-id="'+escapeHtml(u.id)+'">'+(u.premium?'Снять 💎':'💎 +30 дней')+'</button>'+
-        '<button type="button" class="btn '+(u.banned?'btn-user-unban':'btn-user-ban')+'" data-user-action="'+(u.banned?'unban':'ban')+'" data-user-id="'+escapeHtml(u.id)+'">'+(u.banned?'Разбанить':'🚫 Бан')+'</button></div>'+
+        '<button type="button" class="btn btn-user-premium" data-user-action="'+(u.premium?'remove':'premium')+'" data-user-id="'+id+'">'+(u.premium?'Снять 💎':'💎 +30 дней')+'</button>'+
+        '<button type="button" class="btn '+(u.banned?'btn-user-unban':'btn-user-ban')+'" data-user-action="'+(u.banned?'unban':'ban')+'" data-user-id="'+id+'">'+(u.banned?'Разбанить':'🚫 Бан')+'</button></div>'+
         '<div class="person-foot"><span class="person-status">Открытий: '+Math.max(0,Number(u.opens)||0)+'</span>'+
-        '<button type="button" class="btn compact" data-manage-user="'+escapeHtml(u.id)+'">Ещё ↗</button></div></div>';
+        '<button type="button" class="btn compact" data-manage-user="'+id+'">Управление ↗</button></div></div></details>';
     }).join('');
   }
   root.querySelectorAll('[data-manage-user]').forEach(button=>{
@@ -107,7 +112,7 @@ function renderUsers(){
   });
   more.classList.toggle('hidden',filtered.length<=usersVisibleCount);
   note.textContent='Показано '+Math.min(filtered.length,usersVisibleCount)+' из '+filtered.length+
-    '. Время — по часовому поясу устройства. «Недавно» означает отметку за 2 минуты, а не Telegram онлайн.';
+    '. Нажмите на пользователя, чтобы увидеть даты и действия.';
 }
 function showMoreUsers(){
   usersVisibleCount+=60;
