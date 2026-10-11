@@ -551,6 +551,7 @@ async function saveMiniAppActivity(user, action, store, date=new Date()){
   const record={
     ...identity,
     first_seen:previous?.first_seen||now,
+    last_opened:action==='open'?now:(previous?.last_opened||previous?.first_seen||now),
     last_seen:now,
     opens:Math.min(1000000,Math.max(0,Number(previous?.opens)||0)+(action==='open'?1:0))
   };
@@ -573,12 +574,14 @@ async function listMiniAppActivity(store, state, date=new Date()){
       if(!identity)continue;
       const last=Date.parse(raw?.last_seen||'');
       const first=Date.parse(raw?.first_seen||'');
+      const lastOpened=Date.parse(raw?.last_opened||raw?.first_seen||'');
       if(!Number.isFinite(last)||!Number.isFinite(first))continue;
       const isBanned=isActiveRecord(userRecord(state?.banned_users,identity.id));
       const isPremium=!isBanned&&isActiveRecord(userRecord(state?.premium_users,identity.id));
       entries.push({
         ...identity,
         first_seen:new Date(first).toISOString(),
+        last_opened:Number.isFinite(lastOpened)?new Date(lastOpened).toISOString():new Date(first).toISOString(),
         last_seen:new Date(last).toISOString(),
         opens:Math.max(0,Number(raw.opens)||0),
         recent:date.getTime()-last>=0 && date.getTime()-last<=QUIZBOT_ACTIVE_WINDOW_MS,
