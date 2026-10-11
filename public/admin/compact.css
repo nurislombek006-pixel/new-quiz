@@ -1,0 +1,61 @@
+/* QuizBot owner admin: compact 4-tab interface inside Telegram Mini App */
+body.admin-embedded .wrap{max-width:760px;padding:7px 8px 18px}
+body.admin-embedded h1{font-size:19px;letter-spacing:-.3px}
+body.admin-embedded h2{font-size:16px;margin:0 0 10px}
+body.admin-embedded .sub{font-size:11px}
+body.admin-embedded .top{display:flex;align-items:center;gap:12px;margin:0 0 8px}
+body.admin-embedded .status{padding:6px 8px;font-size:10px;max-width:125px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+body.admin-embedded .tabs{position:sticky;top:0;z-index:12;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;background:#08101f;margin:0 0 12px;padding:6px 0 8px;border-bottom:1px solid var(--line);overflow:visible}
+body.admin-embedded .tab{min-width:0;padding:8px 2px;font-size:11px;line-height:1.25;border-radius:12px;border:1px solid #243653;display:flex;flex-direction:column;align-items:center;gap:4px;color:#bdc9db}
+body.admin-embedded .tab.active{color:#fff;background:#1748b1;border-color:#5687ee}
+body.admin-embedded .tab-icon{font-size:17px}
+body.admin-embedded .card{padding:12px;margin:9px 0;border-radius:14px;box-shadow:none}
+body.admin-embedded .grid2{gap:10px}
+body.admin-embedded .btn{padding:10px 12px;border-radius:10px;font-size:13px}
+body.admin-embedded .btn.compact{padding:7px 11px;background:#1d304c;font-size:12px}
+body.admin-embedded label{margin:8px 0 4px;font-size:11px}
+body.admin-embedded input:not([type=checkbox]),body.admin-embedded textarea,body.admin-embedded select{padding:10px;font-size:14px;border-radius:10px}
+body.admin-embedded .mini{font-size:11px;line-height:1.45}
+body.admin-embedded .statgrid{gap:7px}
+body.admin-embedded .stat{padding:9px 8px;border-radius:11px}
+body.admin-embedded .stat b{font-size:20px}
+body.admin-embedded .stat span{font-size:10px}
+body.admin-embedded .section-intro{display:flex;align-items:center;justify-content:space-between;gap:10px}
+body.admin-embedded .section-intro h2{margin:0}
+body.admin-embedded .activity-note{margin:10px 0 12px;color:#90a4c3}
+body.admin-embedded .people-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.admin-embedded .people-toolbar{display:grid;grid-template-columns:1fr;gap:7px;margin:11px 0}
+body.admin-embedded .people-list{display:grid;gap:8px}
+body.admin-embedded .person{border:1px solid #273959;background:#0e1b32;border-radius:14px;padding:11px}
+body.admin-embedded .person-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+body.admin-embedded .person-name{font-size:14px;font-weight:800;color:#edf5ff;word-break:break-word}
+body.admin-embedded .person-handle{color:#8dccfb;font-size:12px;margin-top:3px;overflow-wrap:anywhere}
+body.admin-embedded .person-id{color:#b3c4db;font-size:11px;margin-top:7px;font-variant-numeric:tabular-nums}
+body.admin-embedded .person-time{font-size:11px;color:#a7b7d1;margin-top:5px;line-height:1.4}
+body.admin-embedded .person-foot{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:8px}
+body.admin-embedded .person-status{font-size:11px;color:#acb9cd}
+body.admin-embedded .status-recent{color:#81ecc7}
+body.admin-embedded .status-premium{color:#f9d36d}
+body.admin-embedded .status-banned{color:#ff9ca6}
+body.admin-embedded .fold{border:1px solid #26395b;background:#111c30;border-radius:14px;margin:10px 0;padding:0 11px}
+body.admin-embedded .fold>summary{padding:13px 4px;font-size:13px;font-weight:800;cursor:pointer;list-style:none}
+body.admin-embedded .fold>summary::-webkit-details-marker{display:none}
+body.admin-embedded .fold>summary:after{content:'⌄';float:right;font-size:17px;color:#9eb8dd}
+body.admin-embedded .fold[open]>summary:after{content:'⌃'}
+body.admin-embedded .fold-hint{display:block;font-size:11px;font-weight:400;margin:4px 0 0;color:#93a6c0}
+body.admin-embedded .fold>.card,body.admin-embedded .fold>div>.card{border-color:#26395b}
+body.admin-embedded .fold.dangerous{border-color:rgba(251,77,101,.35)}
+body.admin-embedded .settings-note{margin:8px 0 16px}
+body.admin-embedded .settings-heading{margin:0}
+body.admin-embedded #userCountNote{margin:11px 3px}
+body.admin-embedded #usersMore{margin:12px 0}
+@media(min-width:520px){
+ body.admin-embedded .people-toolbar{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+ body.admin-embedded .people-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+body.admin-embedded #questions .fold-stack{display:block}
+body.admin-embedded #questions .question-fold>.card>h2:first-child{display:none}
+body.admin-embedded .fold-inline{padding:0 8px;margin:10px 0}
+body.admin-embedded .fold-inline>summary{padding:9px 3px;font-size:12px}
+body.admin-embedded #banReason{min-height:70px}

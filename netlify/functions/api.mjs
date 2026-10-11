@@ -508,11 +508,120 @@ async function readAdminBody(request){
   if(request.method === 'GET') return {};
   return request.json().catch(()=>({}));
 }
+// QuizBot user activity. These records represent activity INSIDE the Mini App,
+// never Telegram-wide presence/online status. Signed Telegram identity is mandatory.
+// One blob per Telegram user avoids the lost-update issues of one shared JSON file.
+const QUIZBOT_ACTIVITY_STORE_NAME = 'quizbot-activity';
+const QUIZBOT_ACTIVITY_PREFIX = 'users/';
+const QUIZBOT_ACTIVE_WINDOW_MS = 2 * 60 * 1000;
+
+async function verifyQuizBotVisitor(initData, env){
+  if(!initData || String(initData).length>8192)return null;
+  // Prefer Telegram's public signature bound to the exact Mini App bot.
+  const publicUser=await verifyTelegramPublicSignature(initData, MINI_APP_BOT_ID);
+  if(publicUser)return publicUser;
+  // Legacy Telegram clients may not provide Ed25519 signature.
+  const botToken=env.APP_BOT_TOKEN || env.WEBAPP_BOT_TOKEN || env.QUIZBOT_TOKEN || '';
+  return botToken ? verifyTelegramInitData(initData,botToken) : null;
+}
+function activitySafeName(value, max=80){
+  return String(value||'').replace(/[\u0000-\u001f\u007f<>]/g,'').trim().slice(0,max);
+}
+function activityIdentity(user){
+  const uid=String(user?.id||'');
+  if(!/^[1-9][0-9]{0,18}$/.test(uid))return null;
+  return {
+    id:uid,
+    username:activitySafeName(user.username,32).replace(/[^a-zA-Z0-9_]/g,''),
+    first_name:activitySafeName(user.first_name),
+    last_name:activitySafeName(user.last_name)
+  };
+}
+async function saveMiniAppActivity(user, action, store, date=new Date()){
+  const identity=activityIdentity(user);
+  if(!identity)return {ok:false,error:'INVALID_USER'};
+  const key=QUIZBOT_ACTIVITY_PREFIX+identity.id;
+  const previous=await store.get(key,{type:'json'}).catch(()=>null);
+  const now=date.toISOString();
+  const previousAt=Date.parse(previous?.last_seen||'');
+  const age=Number.isFinite(previousAt)?date.getTime()-previousAt:Infinity;
+  // Throttle accidental duplicates and automated refreshes; never count Telegram
+  // background time as active.
+  if(age>=0 && age<45_000)return {ok:true,tracked:true,throttled:true};
+  const record={
+    ...identity,
+    first_seen:previous?.first_seen||now,
+    last_opened:action==='open'?now:(previous?.last_opened||previous?.first_seen||now),
+    last_seen:now,
+    opens:Math.min(1000000,Math.max(0,Number(previous?.opens)||0)+(action==='open'?1:0))
+  };
+  if(!previous)record.opens=1;
+  await store.set(key,JSON.stringify(record));
+  return {ok:true,tracked:true};
+}
+async function listMiniAppActivity(store, state, date=new Date()){
+  const listing=await store.list({prefix:QUIZBOT_ACTIVITY_PREFIX});
+  const keys=(listing?.blobs||[]).map(item=>item.key)
+    .filter(key=>/^users\/[1-9]\d{0,18}$/.test(key));
+  const entries=[];
+  // Read in small batches to avoid overwhelming Netlify's data API.
+  for(let i=0;i<keys.length;i+=30){
+    const batch=await Promise.all(keys.slice(i,i+30).map(async key=>{
+      try{return await store.get(key,{type:'json'})}catch{return null}
+    }));
+    for(const raw of batch){
+      const identity=activityIdentity(raw);
+      if(!identity)continue;
+      const last=Date.parse(raw?.last_seen||'');
+      const first=Date.parse(raw?.first_seen||'');
+      const lastOpened=Date.parse(raw?.last_opened||raw?.first_seen||'');
+      if(!Number.isFinite(last)||!Number.isFinite(first))continue;
+      const isBanned=isActiveRecord(userRecord(state?.banned_users,identity.id));
+      const isPremium=!isBanned&&isActiveRecord(userRecord(state?.premium_users,identity.id));
+      entries.push({
+        ...identity,
+        first_seen:new Date(first).toISOString(),
+        last_opened:Number.isFinite(lastOpened)?new Date(lastOpened).toISOString():new Date(first).toISOString(),
+        last_seen:new Date(last).toISOString(),
+        opens:Math.max(0,Number(raw.opens)||0),
+        recent:date.getTime()-last>=0 && date.getTime()-last<=QUIZBOT_ACTIVE_WINDOW_MS,
+        premium:!!isPremium,
+        banned:!!isBanned
+      });
+    }
+  }
+  entries.sort((a,b)=>Date.parse(b.last_seen)-Date.parse(a.last_seen));
+  const nowMs=date.getTime();
+  return {
+    ok:true,
+    users:entries,
+    stats:{
+      total:entries.length,
+      recent:entries.filter(u=>u.recent).length,
+      today:entries.filter(u=>nowMs-Date.parse(u.last_seen)>=0&&nowMs-Date.parse(u.last_seen)<86400000).length,
+      premium:entries.filter(u=>u.premium).length
+    },
+    updated_at:date.toISOString(),
+    note:'Данные собираются только при открытом QuizBot Mini App, начиная с установки отслеживания.'
+  };
+}
+
 async function handleAdmin(request, env, path){
   if(request.method === 'OPTIONS') return new Response(null,{status:204,headers:corsHeaders(request)});
   const auth = await adminOwnerOk(request, env);
   if(!auth.ok) return adminJson(request, {ok:false, error:auth.message, code:auth.code||'ADMIN_ACCESS_DENIED'}, auth.status);
   if(path === '/api/admin/me' && request.method === 'GET') return adminJson(request,{ok:true,admin:true});
+  if(path === '/api/admin/users' && request.method === 'GET'){
+    try{
+      const store=getStore(QUIZBOT_ACTIVITY_STORE_NAME);
+      const state=await getAccessState(env);
+      const data=await listMiniAppActivity(store,state);
+      return adminJson(request,data);
+    }catch(e){
+      console.error('Could not retrieve QuizBot Mini App activity:',String(e?.message||e));
+      return adminJson(request,{ok:false,error:'Не удалось загрузить список активности QuizBot.'},500);
+    }
+  }
   if(path === '/api/admin/debug-auth' && request.method === 'POST'){
     return adminJson(request,{
       ok:true,
@@ -836,6 +945,24 @@ async function handleRequest(request, env){
 
   if(path==='/' || path==='/api/health'){
     return jsonResponse(request,{ok:true, service:'quizbot-backend', storage:'kv-one-key', access_key:ACCESS_KEY, tests_key:TESTS_KEY, cache_ttl_seconds:cacheTtl(env), tests_cache_ttl_seconds:testsCacheTtl(env)});
+  }
+
+  if(path==='/api/activity' && request.method==='POST'){
+    // The client sends only event type + signed initData; username and ID
+    // are always extracted from the cryptographically verified Telegram user.
+    const initData=request.headers.get('X-Telegram-Init-Data')||'';
+    const user=await verifyQuizBotVisitor(initData,env);
+    if(!user)return jsonResponse(request,{ok:false,error:'TELEGRAM_AUTH_REQUIRED'},401);
+    const body=await request.json().catch(()=>({}));
+    const action=body?.event==='open'?'open':'heartbeat';
+    try{
+      const store=getStore(QUIZBOT_ACTIVITY_STORE_NAME);
+      const result=await saveMiniAppActivity(user,action,store);
+      return jsonResponse(request,result,result.ok?200:400);
+    }catch(e){
+      console.error('Could not save QuizBot Mini App activity:',String(e?.message||e));
+      return jsonResponse(request,{ok:false,error:'ACTIVITY_STORAGE_UNAVAILABLE'},503);
+    }
   }
 
   if(path.startsWith('/api/admin')){
