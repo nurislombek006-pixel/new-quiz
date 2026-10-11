@@ -146,7 +146,7 @@ body.admin-embedded .card{margin:9px 0}
     <div class="card subject-editor">
       <div class="split-title subject-editor-heading">
         <h2 id="subjectEditorHeading">➕ Новый предмет</h2>
-        <button type="button" class="btn compact" id="subjectNewAction" onclick="resetSubjectForm()">＋ Новый</button>
+        <button type="button" class="btn compact" id="subjectNewAction" onclick="resetSubjectForm(true)">＋ Новый</button>
       </div>
       <label for="subjectTitle">Название предмета</label>
       <div class="subject-name-row">
@@ -294,11 +294,121 @@ async function health(){const r=await fetch(apiBase()+'/api/health');const data=
 async function givePremium(){const user_id=cleanId($('premId').value);if(!user_id)return alert('Впиши Telegram ID');const body={user_id,note:$('premNote').value.trim()||'Выдано вручную'};const expires=$('premExpires').value;const days=Number($('premDays').value||0);const fp=$('premFp').value.trim().toUpperCase();if(expires)body.expires=expires;else if(days>0)body.days=days;if(fp)body.fingerprint=fp;await req('/api/admin/premium','POST',body);await refreshLists(false)}async function removePremium(){const user_id=cleanId($('premId').value);if(!user_id)return alert('Впиши Telegram ID');await req('/api/admin/premium/remove','POST',{user_id});await refreshLists(false)}async function clearAllPremium(){if(!confirm('Точно убрать премиум у ВСЕХ?'))return;const typed=prompt('Для подтверждения напиши: УБРАТЬ');if(typed!=='УБРАТЬ')return alert('Отменено');await req('/api/admin/premium/clear','POST',{confirm:'CLEAR_PREMIUM'});await refreshLists(false)}
 async function banUser(){const user_id=cleanId($('banId').value);if(!user_id)return alert('Впиши Telegram ID');const body={user_id,reason:$('banReason').value.trim()||'Доступ заблокирован.'};if($('banUntil').value){body.until=$('banUntil').value;body.type='temporary'}else body.type='permanent';await req('/api/admin/ban','POST',body);await refreshLists(false)}async function unbanUser(){const user_id=cleanId($('banId').value);if(!user_id)return alert('Впиши Telegram ID');await req('/api/admin/unban','POST',{user_id});await refreshLists(false)}async function checkUserFromPremium(){const user_id=cleanId($('premId').value);if(!user_id)return alert('Впиши Telegram ID');const fingerprint=$('premFp').value.trim().toUpperCase();await req('/api/admin/check','POST',{user_id,fingerprint})}
 function escapeHtml(s){return String(s||'').replace(/[&<>\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]))}function renderObj(target,obj,type){const el=$(target);const users=(obj&&obj.users)||{};const entries=Object.entries(users);if(!entries.length){el.innerHTML='<div class="empty">Пусто</div>';return}el.innerHTML=entries.map(([id,u])=>{const active=u&&u.active!==false?'активен':'выключен';const main=type==='premium'?`${u.expires?'до '+u.expires:'без срока'} ${u.fingerprint?' · FP '+u.fingerprint:''}`:`${u.reason||'без причины'} ${u.until?' · до '+u.until:''}`;return `<div class="item"><b>${id}</b><div>${active}<br>${escapeHtml(main)}<br>${escapeHtml(u.note||'')}</div></div>`}).join('')}async function refreshLists(show=true){const data=await req('/api/admin/list','GET');renderObj('premiumList',data.premium_users,'premium');renderObj('banList',data.banned_users,'ban');if(!show)out({ok:true,counts:data.counts||{}})}function copyResult(){navigator.clipboard?.writeText($('result').textContent);toast('Скопировано')}
-function renderSubjects(list){subjectsMeta=list||[];if(!subjectsMeta.length){$('subjectsList').innerHTML='<div class="empty">Предметов пока нет</div>';$('importSubject').innerHTML='<option value="marketing">marketing</option>';return} $('subjectsList').innerHTML=subjectsMeta.map(s=>`<span class="pill">${escapeHtml(s.emoji||'📚')} ${escapeHtml(s.title||s.key)} · ${escapeHtml(s.key)} · ${s.count||0}</span>`).join('');$('importSubject').innerHTML=subjectsMeta.map(s=>`<option value="${escapeHtml(s.key)}">${escapeHtml((s.emoji||'📚')+' '+(s.title||s.key))} · ${s.count||0}</option>`).join('');const first=subjectsMeta[0];if(first&&!$('subjectKey').value){fillSubjectForm(first)}}
-function fillSubjectForm(s){$('subjectKey').value=s.key||'';$('subjectTitle').value=s.title||'';$('subjectShort').value=s.short||s.title||'';$('subjectEmoji').value=s.emoji||'📚'}
-function updateQStats(data){const total=data.total??'—';const version=data.data_version||'—';const list=data.subjects_list||[];renderSubjects(list);$('qStats').innerHTML=`<div class="stat"><b>${total}</b><span>всего вопросов</span></div><div class="stat"><b>${list.length}</b><span>предметов</span></div><div class="stat"><b>${escapeHtml(version||'—')}</b><span>версия базы</span></div>`}
-async function questionsInfo(){const data=await req('/api/admin/tests/info','GET');updateQStats(data)}async function saveSubjectName(){const key=slug($('subjectKey').value||$('subjectTitle').value);const title=$('subjectTitle').value.trim();const short=$('subjectShort').value.trim()||title;const emoji=$('subjectEmoji').value.trim()||'📚';if(!key)return alert('Напиши ключ предмета');if(!title)return alert('Напиши название предмета');const data=await req('/api/admin/tests/subject','POST',{key,title,short,emoji});updateQStats(data.counts||data)}async function deleteSubject(){const key=slug($('subjectKey').value);if(!key)return alert('Впиши ключ предмета');if(!confirm('Удалить предмет '+key+' вместе с вопросами?'))return;const data=await req('/api/admin/tests/subject/delete','POST',{key});updateQStats(data.counts||data)}
-async function readTestsFile(){const f=$('testsFile').files[0];if(!f)return;const text=await f.text();$('testsJson').value=text;try{const data=JSON.parse(text);out({ok:true,file:f.name,preview_counts:countLocalTests(data)})}catch(e){out({ok:false,error:'Файл не похож на JSON: '+e.message})}}function countLocalTests(data){let d=data;if(Array.isArray(d))return {total:d.length,format:'array'};if(d.data&&d.data.subjects)d=d.data;if(d.tests&&Array.isArray(d.tests))return {total:d.tests.length,format:'tests'};if(d.subjects){let total=0,per={};for(const [k,s] of Object.entries(d.subjects)){const n=Array.isArray(s.tests)?s.tests.length:0;per[k]=n;total+=n}return {total,per_subject:per,data_version:d.data_version||''}}return {total:0,warning:'не найден subjects/tests'}}async function importQuestions(){const raw=$('testsJson').value.trim();if(!raw)return alert('Выбери tests.json или вставь JSON');let data;try{data=JSON.parse(raw)}catch(e){return alert('Ошибка JSON: '+e.message)}const full=$('importFull').checked;if(!confirm(full?'Заменить всю базу этим JSON?':'Сохранить вопросы в выбранный предмет?'))return;const body=full?data:{subject_key:$('importSubject').value||$('subjectKey').value||'marketing',title:$('subjectTitle').value.trim()||undefined,short:$('subjectShort').value.trim()||undefined,emoji:$('subjectEmoji').value.trim()||undefined,tests_data:data};const res=await req('/api/admin/tests/import','POST',body);updateQStats(res.counts||res.meta||res)}async function exportQuestions(){const data=await req('/api/admin/tests/export','GET');lastExport=data.tests_data;$('testsJson').value=JSON.stringify(data.tests_data,null,2);updateQStats(data)}function downloadLastQuestions(){if(!lastExport){try{lastExport=JSON.parse($('testsJson').value)}catch(e){return alert('Сначала нажми Получить текущие вопросы')}}const blob=new Blob([JSON.stringify(lastExport,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tests.json';a.click();URL.revokeObjectURL(a.href)}function clearQuestionsBox(){$('testsJson').value=''}
+function renderSubjects(list){
+  subjectsMeta=Array.isArray(list)?list:[];
+  const listEl=$('subjectsList');
+  const importSelect=$('importSubject');
+  const selected=String($('subjectKey').value||'');
+  const previousImport=importSelect.value;
+  if(!subjectsMeta.length){
+    listEl.innerHTML='<div class="empty">Предметов пока нет. Создай первый ниже.</div>';
+    importSelect.innerHTML='<option value="">Сначала создай предмет</option>';
+    resetSubjectForm();
+    return;
+  }
+  listEl.innerHTML=subjectsMeta.map(item=>{
+    const key=escapeHtml(item.key||'');
+    const name=escapeHtml(item.title||item.key||'Предмет');
+    const emoji=escapeHtml(item.emoji||'📚');
+    const count=Math.max(0,Number(item.count)||0);
+    const active=String(item.key)===selected;
+    return '<button type="button" class="subject-chip'+(active?' selected':'')+'" data-subject-key="'+key+'" aria-pressed="'+active+'">'+
+      '<span class="subject-chip-main">'+emoji+' '+name+'</span><span class="subject-chip-count">'+count+' вопр.</span></button>';
+  }).join('');
+  listEl.querySelectorAll('[data-subject-key]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const item=subjectsMeta.find(entry=>String(entry.key)===button.dataset.subjectKey);
+      if(item)fillSubjectForm(item);
+    });
+  });
+  importSelect.innerHTML=subjectsMeta.map(item=>
+    '<option value="'+escapeHtml(item.key||'')+'">'+escapeHtml((item.emoji||'📚')+' '+(item.title||item.key))+'</option>'
+  ).join('');
+  if(subjectsMeta.some(item=>String(item.key)===previousImport))importSelect.value=previousImport;
+  // Avoid resetting an unsaved title while the owner is editing it.
+  if(selected && !subjectsMeta.some(item=>String(item.key)===selected))resetSubjectForm();
+}
+function resetSubjectForm(focus=false){
+  $('subjectKey').value='';
+  $('subjectShort').value='';
+  $('subjectTitle').value='';
+  $('subjectEmoji').value='📚';
+  $('subjectEditorHeading').textContent='➕ Новый предмет';
+  $('subjectEditorHint').textContent='Введи название — ключ и короткое название создаются автоматически.';
+  $('subjectDeleteAction').classList.add('hidden');
+  $('subjectSaveAction').textContent='✓ Создать предмет';
+  $('subjectsList').querySelectorAll('[data-subject-key]').forEach(button=>{
+    button.classList.remove('selected');button.setAttribute('aria-pressed','false');
+  });
+  if(focus)$('subjectTitle').focus();
+}
+function fillSubjectForm(item){
+  if(!item)return;
+  $('subjectKey').value=item.key||'';
+  $('subjectTitle').value=item.title||'';
+  $('subjectShort').value=item.short||item.title||'';
+  $('subjectEmoji').value=item.emoji||'📚';
+  $('subjectEditorHeading').textContent='✏️ Изменить предмет';
+  $('subjectEditorHint').textContent='Изменения названия не удаляют существующие вопросы.';
+  $('subjectDeleteAction').classList.remove('hidden');
+  $('subjectSaveAction').textContent='✓ Сохранить изменения';
+  $('subjectsList').querySelectorAll('[data-subject-key]').forEach(button=>{
+    const active=button.dataset.subjectKey===String(item.key);
+    button.classList.toggle('selected',active);
+    button.setAttribute('aria-pressed',String(active));
+  });
+}
+function updateQStats(data){
+  const total=Number(data?.total);
+  const list=Array.isArray(data?.subjects_list)?data.subjects_list:[];
+  renderSubjects(list);
+  $('qStats').innerHTML='<div class="stat"><b>'+(Number.isFinite(total)?total:'—')+'</b><span>вопросов</span></div>'+
+    '<div class="stat"><b>'+list.length+'</b><span>предметов</span></div>';
+}
+async function questionsInfo(){
+  const data=await req('/api/admin/tests/info','GET');
+  updateQStats(data);
+}
+async function saveSubjectName(){
+  const title=$('subjectTitle').value.trim().replace(/\s+/g,' ');
+  const emoji=$('subjectEmoji').value.trim()||'📚';
+  const selectedKey=String($('subjectKey').value||'');
+  if(!title)return alert('Впиши название предмета.');
+  const editing=subjectsMeta.find(item=>String(item.key)===selectedKey);
+  if(selectedKey&&!editing)return alert('Предмет больше не существует. Нажми «＋ Новый».');
+  const key=editing?selectedKey:slug(title);
+  if(!key||key.length>80)return alert('Название должно содержать буквы или цифры.');
+  const duplicate=subjectsMeta.find(item=>String(item.key)!==key&&(
+    String(item.key)===slug(title)||
+    String(item.title||'').trim().toLocaleLowerCase()===title.toLocaleLowerCase()
+  ));
+  if(duplicate)return alert('Такой предмет уже существует. Выбери его из списка для редактирования.');
+  if(!editing && subjectsMeta.some(item=>String(item.key)===key)){
+    return alert('Такой предмет уже есть. Выбери его выше, чтобы изменить.');
+  }
+  const button=$('subjectSaveAction');
+  button.disabled=true;
+  try{
+    const result=await req('/api/admin/tests/subject','POST',{key,title,short:title,emoji});
+    updateQStats(result.counts||result);
+    const saved=subjectsMeta.find(item=>String(item.key)===key);
+    if(saved)fillSubjectForm(saved);
+    toast(editing?'Предмет обновлён':'Предмет создан');
+    return result;
+  }finally{button.disabled=false}
+}
+async function deleteSubject(){
+  const key=String($('subjectKey').value||'');
+  const current=subjectsMeta.find(item=>String(item.key)===key);
+  if(!current)return alert('Сначала выбери предмет из списка.');
+  const count=Math.max(0,Number(current.count)||0);
+  if(!confirm('Удалить предмет «'+(current.title||key)+'» и все его вопросы ('+count+')? Это нельзя отменить.'))return;
+  const result=await req('/api/admin/tests/subject/delete','POST',{key});
+  resetSubjectForm();
+  updateQStats(result.counts||result);
+  toast('Предмет удалён');
+}
+async function readTestsFile(){const f=$('testsFile').files[0];if(!f)return;const text=await f.text();$('testsJson').value=text;try{const data=JSON.parse(text);out({ok:true,file:f.name,preview_counts:countLocalTests(data)})}catch(e){out({ok:false,error:'Файл не похож на JSON: '+e.message})}}function countLocalTests(data){let d=data;if(Array.isArray(d))return {total:d.length,format:'array'};if(d.data&&d.data.subjects)d=d.data;if(d.tests&&Array.isArray(d.tests))return {total:d.tests.length,format:'tests'};if(d.subjects){let total=0,per={};for(const [k,s] of Object.entries(d.subjects)){const n=Array.isArray(s.tests)?s.tests.length:0;per[k]=n;total+=n}return {total,per_subject:per,data_version:d.data_version||''}}return {total:0,warning:'не найден subjects/tests'}}async function importQuestions(){const raw=$('testsJson').value.trim();if(!raw)return alert('Выбери tests.json или вставь JSON');let data;try{data=JSON.parse(raw)}catch(e){return alert('Ошибка JSON: '+e.message)}const full=$('importFull').checked;if(!confirm(full?'Заменить всю базу этим JSON?':'Сохранить вопросы в выбранный предмет?'))return;const body=full?data:{subject_key:$('importSubject').value||'macro',tests_data:data};const res=await req('/api/admin/tests/import','POST',body);updateQStats(res.counts||res.meta||res)}async function exportQuestions(){const data=await req('/api/admin/tests/export','GET');lastExport=data.tests_data;$('testsJson').value=JSON.stringify(data.tests_data,null,2);updateQStats(data)}function downloadLastQuestions(){if(!lastExport){try{lastExport=JSON.parse($('testsJson').value)}catch(e){return alert('Сначала нажми Получить текущие вопросы')}}const blob=new Blob([JSON.stringify(lastExport,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tests.json';a.click();URL.revokeObjectURL(a.href)}function clearQuestionsBox(){$('testsJson').value=''}
 async function loadReportSettings(){const data=await req('/api/admin/report-settings','GET');$('reportChatId').value=data.chat_id||'';$('reportTokenInfo').textContent='Сохранённый токен: '+(data.token_mask||'—')+(data.updated?' · обновлён '+data.updated:'');$('reportToken').value='';return data}async function saveReportSettings(){const bot_token=$('reportToken').value.trim();const chat_id=$('reportChatId').value.trim();if(!chat_id)return alert('Впиши Telegram ID / Chat ID');const body={chat_id};if(bot_token)body.bot_token=bot_token;const data=await req('/api/admin/report-settings','POST',body);$('reportTokenInfo').textContent='Сохранённый токен: '+(data.token_mask||'—')+(data.updated?' · обновлён '+data.updated:'');$('reportToken').value=''}async function testReport(){const text=$('reportTestText').value.trim()||'✅ Тестовый отчёт от QuizBot';await req('/api/admin/report-test','POST',{text})}
 async function initializeEmbeddedAdmin(){
   function deny(text){
@@ -347,7 +457,7 @@ initializeEmbeddedAdmin();
 <script src="./quick-actions.js?v=1"></script>
 <script src="./vendor/jszip.min.js?v=1"></script>
 <script src="./document-import.js?v=1"></script>
-<script src="./subjects-ui.js?v=1"></script>
+
 <script src="/migration.js?v=1"></script>
 </body>
 </html>
