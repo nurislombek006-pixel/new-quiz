@@ -241,10 +241,13 @@ body.light .offer-box{background:#fff!important;border-color:#dfe7f4!important;c
 body:not(.light) .offer-box{background:#1b2b45!important;border-color:#3a4e6b!important;color:#f4f7ff!important}
 body.light .offer-card{background:#f4f7ff!important;border-color:#dce5f4!important}
 body:not(.light) .offer-card{background:#243753!important;border-color:#39516e!important}
-body.light .paybox{background:#fff!important;color:#23314c!important;border-color:#dce5f4!important}
-body:not(.light) .paybox{background:#1b2b45!important;color:#f2f6ff!important;border-color:#3a4e6b!important}
-body.light .pay-card{background:#f4f7ff!important;color:#23314c!important}
-body:not(.light) .pay-card{background:#203350!important;color:#f2f6ff!important}
+/* Keep the payment dialog dark in both modes: card labels and account text are white. */
+body.light .paybox,body:not(.light) .paybox{background:#192943!important;color:#f2f6ff!important;border-color:#405475!important}
+body.light .pay-card,body:not(.light) .pay-card{background:#203350!important;color:#f2f6ff!important;border-color:#415777!important}
+.pay-icon,.splash-mark{background:var(--theme-primary)!important}
+body.light .splash,body:not(.light) .splash{background:radial-gradient(circle at 50% 20%,rgba(131,149,243,.25),transparent 42%),linear-gradient(180deg,#1d2c50,#0e1730)!important}
+body.light .pay-card-number-row,body:not(.light) .pay-card-number-row{background:#14243d!important;border-color:#4f7baf!important}
+body.light .pay-input,body:not(.light) .pay-input{background:#12243e!important;border-color:#476081!important;color:#fff!important}
 .btn:hover,.mode-tab:hover,.subject-choice:hover,.drawer-item:hover{
   filter:brightness(1.025);
 }
