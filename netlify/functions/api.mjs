@@ -96,6 +96,46 @@ async function verifyTelegramInitData(initData, botToken){
   }catch(e){ return null; }
 }
 
+
+// Telegram Bot API 8+ provides a second, independent Ed25519 signature in initData.
+// It proves the payload was issued for a SPECIFIC bot without using a bot token.
+// This is not initDataUnsafe: every field (including user.id) is cryptographically verified.
+// The bot ID is public; it is the QuizBot Mini App bot confirmed by its owner.
+// Source: https://core.telegram.org/bots/webapps#validating-data-for-third-party-use
+const MINI_APP_BOT_ID = '8840247539';
+const TELEGRAM_ED25519_PRODUCTION_KEY = 'e7bf03a2fa4602af4580703d88dda5bb59f32ed8b02a56c187fe7d34caed242d';
+
+async function verifyTelegramPublicSignature(initData, botId, publicKeyHex=TELEGRAM_ED25519_PRODUCTION_KEY){
+  try{
+    if(!initData || String(initData).length>8192 || !/^[1-9]\d{4,18}$/.test(String(botId)))return null;
+    const params=new URLSearchParams(initData);
+    const signatureText=params.get('signature')||'';
+    if(!/^[a-zA-Z0-9_-]{80,100}$/.test(signatureText))return null;
+    const binary=atob(signatureText.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-signatureText.length%4)%4));
+    const signature=Uint8Array.from(binary,c=>c.charCodeAt(0));
+    if(signature.length!==64)return null;
+
+    const authDate=Number(params.get('auth_date'));
+    const now=Math.floor(Date.now()/1000);
+    if(!Number.isSafeInteger(authDate)||authDate<=0||Math.abs(now-authDate)>86400)return null;
+    const dataCheckString=Array.from(params.entries())
+      .filter(([key])=>key!=='hash'&&key!=='signature')
+      .sort(([a],[b])=>a<b?-1:a>b?1:0)
+      .map(([key,value])=>key+'='+value).join('\n');
+    const signedMessage=String(botId)+':WebAppData\n'+dataCheckString;
+    if(!/^[0-9a-f]{64}$/i.test(publicKeyHex))return null;
+    const publicKeyBytes=new Uint8Array(publicKeyHex.match(/.{2}/g).map(h=>parseInt(h,16)));
+    const publicKey=await crypto.subtle.importKey('raw',publicKeyBytes,{name:'Ed25519'},false,['verify']);
+    if(!await crypto.subtle.verify({name:'Ed25519'},publicKey,signature,textEncoder().encode(signedMessage)))return null;
+
+    const userRaw=params.get('user');
+    if(!userRaw)return null;
+    const user=JSON.parse(userRaw);
+    if(!user||!/^[1-9][0-9]{0,18}$/.test(String(user.id||'')))return null;
+    return user;
+  }catch(e){return null;}
+}
+
 function getAppBotToken(env){
   // Токен именно того бота, через которого открывается Telegram Mini App.
   // Если отчеты идут через другой бот, обязательно добавь APP_BOT_TOKEN.
@@ -429,16 +469,27 @@ async function adminOwnerOk(request, env){
   const tokens = [...new Set([
     env.APP_BOT_TOKEN, env.WEBAPP_BOT_TOKEN, env.QUIZBOT_TOKEN, env.BOT_TOKEN
   ].filter(token=>typeof token==='string' && token.trim()))];
-  if(!tokens.length){
-    return {ok:false,status:503,code:'TELEGRAM_BOT_NOT_CONFIGURED',message:'На Netlify не задан APP_BOT_TOKEN (токен бота, открывающего Mini App).'};
+  if(!tokens.length && !new URLSearchParams(initData).get('signature')){
+    return {ok:false,status:503,code:'TELEGRAM_BOT_NOT_CONFIGURED',message:'Нет токена Netlify и публичной подписи Telegram для проверки Mini App.'};
   }
   let signedUser = null;
   for(const token of tokens){
     signedUser = await verifyTelegramInitData(initData, token);
     if(signedUser)break;
   }
+  // A rotated/mismatched Netlify token must not block an authentic Telegram
+  // session for this exact Mini App bot. Ed25519 is verified independently
+  // against Telegram's official public key AND our configured app's bot ID.
   if(!signedUser){
-    return {ok:false,status:403,code:'TELEGRAM_SIGNATURE_INVALID',message:'Netlify не смог проверить Telegram-сессию. Проверьте APP_BOT_TOKEN и заново откройте Mini App.'};
+    signedUser = await verifyTelegramPublicSignature(initData, MINI_APP_BOT_ID);
+  }
+  if(!signedUser){
+    const signaturePresent = !!new URLSearchParams(initData).get('signature');
+    return {ok:false,status:403,
+      code:signaturePresent?'TELEGRAM_SIGNATURE_INVALID':'TELEGRAM_PUBLIC_SIGNATURE_MISSING',
+      message:signaturePresent
+        ?'Подпись Telegram не прошла проверку ни по токенам Netlify, ни по публичному ключу указанного бота.'
+        :'Telegram не передал публичную подпись, а проверка токеном Netlify не прошла. Проверьте APP_BOT_TOKEN.'};
   }
   if(String(signedUser.id)!==ADMIN_OWNER_TELEGRAM_ID){
     return {ok:false,status:403,code:'NOT_ADMIN_OWNER',message:'Этот Telegram-аккаунт не является владельцем.'};

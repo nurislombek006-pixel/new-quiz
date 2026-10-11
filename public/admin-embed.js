@@ -39,7 +39,8 @@
     const reasons={
       TELEGRAM_SESSION_MISSING:'Telegram не передал данные входа. Откройте Mini App кнопкой бота.',
       TELEGRAM_BOT_NOT_CONFIGURED:'В Netlify не настроен токен бота для Mini App.',
-      TELEGRAM_SIGNATURE_INVALID:'Netlify не смог подтвердить подпись Telegram. Возможно, APP_BOT_TOKEN не совпадает с ботом, открывающим приложение.',
+      TELEGRAM_SIGNATURE_INVALID:'Ни токен Netlify, ни публичная подпись Telegram не подтвердили запуск нужным ботом.',
+      TELEGRAM_PUBLIC_SIGNATURE_MISSING:'Telegram не передал публичную подпись. Проверьте токен Mini App в Netlify.',
       NOT_ADMIN_OWNER:'Сервер подтвердил другого Telegram-пользователя.',
       HTTP_404:'Netlify не нашёл серверный маршрут /api/admin/me.',
       HTTP_502:'Netlify не смог выполнить серверную функцию.',
