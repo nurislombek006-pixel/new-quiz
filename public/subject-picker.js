@@ -8,6 +8,7 @@
   if(!select||!trigger)return;
 
   let popup=null;
+  let closing=false;
   let pending=null;
   let lastSuccess=0;
   const esc=str=>String(str||'');
@@ -61,12 +62,41 @@
   window.refreshSubjectCatalog=refreshSubjectCatalog;
 
   function closePicker(){
-    if(!popup)return;
-    popup.remove();
-    popup=null;
-    document.body.classList.remove('subject-picker-open');
-    syncTrigger();
-    trigger.focus({preventScroll:true});
+    if(!popup||closing)return;
+    const closingLayer=popup;
+    closing=true;
+    const finish=()=>{
+      if(popup===closingLayer){
+        closingLayer.remove();
+        popup=null;
+        document.body.classList.remove('subject-picker-open');
+        syncTrigger();
+        trigger.focus({preventScroll:true});
+      }
+      closing=false;
+    };
+    const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    if(reduce)return finish();
+    closingLayer.classList.add('is-closing');
+    // Animate only opacity and transform; never delay the actual subject change.
+    setTimeout(finish,160);
+  }
+  function animateSubjectSwitch(){
+    if(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
+    trigger.classList?.remove('is-switching');
+    // Force one short animation restart without repainting the entire question list.
+    void trigger.offsetWidth;
+    trigger.classList?.add('is-switching');
+    const start=document.getElementById('start-screen');
+    if(start){
+      start.classList.remove('qb-subject-updated');
+      void start.offsetWidth;
+      start.classList.add('qb-subject-updated');
+    }
+    setTimeout(()=>{
+      trigger.classList?.remove('is-switching');
+      start?.classList.remove('qb-subject-updated');
+    },250);
   }
   function renderOptions(message=''){
     if(!popup)return;
@@ -99,8 +129,9 @@
         button.addEventListener('click',()=>{
           if(typeof switchSubject==='function')switchSubject(key);
           syncTrigger();
-          closePicker();
           if(typeof showScreen==='function')showScreen('start-screen');
+          animateSubjectSwitch();
+          closePicker();
         });
         container.appendChild(button);
       }
