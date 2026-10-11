@@ -22,6 +22,7 @@ body.admin-embedded .card{margin:9px 0}
 <link rel="stylesheet" href="./compact.css?v=1">
 <link rel="stylesheet" href="./quick-actions.css?v=1">
 <link rel="stylesheet" href="./document-import.css?v=1">
+<link rel="stylesheet" href="./subjects-ui.css?v=1">
 <link rel="stylesheet" href="./soft-type.css?v=2">
 </head>
 <body>
@@ -136,6 +137,33 @@ body.admin-embedded .card{margin:9px 0}
   </div>
 
   <div id="questions" class="pane">
+    <details class="fold" id="subjectFold"><summary>📚 Управление предметами <span class="fold-hint">Добавить, изменить или удалить</span></summary>
+  <div id="subjectsPane">
+    <div class="card">
+      <div class="split-title"><h2>📚 Предметы</h2><button class="btn" onclick="questionsInfo()">Обновить</button></div>
+      <div id="subjectsList" class="mini">Список появится после подключения.</div>
+    </div>
+    <div class="card subject-editor">
+      <div class="split-title subject-editor-heading">
+        <h2 id="subjectEditorHeading">➕ Новый предмет</h2>
+        <button type="button" class="btn compact" id="subjectNewAction" onclick="resetSubjectForm()">＋ Новый</button>
+      </div>
+      <label for="subjectTitle">Название предмета</label>
+      <div class="subject-name-row">
+        <input id="subjectTitle" placeholder="Например: Макроэкономика" maxlength="90" autocomplete="off">
+        <input id="subjectEmoji" placeholder="📚" maxlength="4" aria-label="Эмодзи предмета" title="Эмодзи (необязательно)">
+      </div>
+      <input type="hidden" id="subjectKey">
+      <input type="hidden" id="subjectShort">
+      <p class="mini" id="subjectEditorHint">Напиши название и нажми «Сохранить». Остальное создаётся автоматически.</p>
+      <div class="subject-editor-actions">
+        <button type="button" class="btn green" id="subjectSaveAction" onclick="saveSubjectName()">✓ Сохранить</button>
+        <button type="button" class="btn red hidden" id="subjectDeleteAction" onclick="deleteSubject()">Удалить</button>
+      </div>
+    </div>
+  </div>
+
+    </details>
     <div class="card doc-import-card">
       <div class="quick-header">
         <h2>📄 Загрузить вопросы из Word</h2>
@@ -193,7 +221,7 @@ D) 6</pre>
     </div>
     <div class="card">
       <div class="split-title"><h2>📝 Вопросы</h2><button class="btn" onclick="questionsInfo()">Количество</button></div>
-      <div class="statgrid" id="qStats"><div class="stat"><b>—</b><span>вопросов</span></div><div class="stat"><b>—</b><span>предметов</span></div><div class="stat"><b>—</b><span>версия</span></div></div>
+      <div class="statgrid compact-qstats" id="qStats"><div class="stat"><b>—</b><span>вопросов</span></div><div class="stat"><b>—</b><span>предметов</span></div></div>
     </div>
     <div class="grid2">
       <div class="card">
@@ -212,26 +240,7 @@ D) 6</pre>
         <button class="btn purple full" onclick="downloadLastQuestions()">Скачать JSON</button>
       </div>
     </div>
-    <details class="fold" id="subjectFold"><summary>📚 Управление предметами <span class="fold-hint">Добавить, изменить или удалить</span></summary>
-  <div id="subjectsPane">
-    <div class="card">
-      <div class="split-title"><h2>📚 Предметы</h2><button class="btn" onclick="questionsInfo()">Обновить</button></div>
-      <div id="subjectsList" class="mini">Список появится после подключения.</div>
-    </div>
-    <div class="card">
-      <h2>➕ Добавить / изменить предмет</h2>
-      <div class="grid3">
-        <div><label>Ключ предмета</label><input id="subjectKey" placeholder="marketing"></div>
-        <div><label>Полное название</label><input id="subjectTitle" placeholder="Маркетинг"></div>
-        <div><label>Короткое название</label><input id="subjectShort" placeholder="Маркетинг"></div>
-      </div>
-      <label>Эмодзи</label><input id="subjectEmoji" placeholder="📚" maxlength="4">
-      <div class="row" style="margin-top:12px"><button class="btn green" onclick="saveSubjectName()">Сохранить предмет</button><button class="btn red" onclick="deleteSubject()">Удалить предмет</button></div>
-      <div class="mini">Ключ лучше латиницей: marketing, macro, micro, finance. Его видно только в базе.</div>
-    </div>
-  </div>
 
-    </details>
   </div>
 
   <section id="settings" class="pane" aria-label="Дополнительные настройки">
@@ -338,6 +347,7 @@ initializeEmbeddedAdmin();
 <script src="./quick-actions.js?v=1"></script>
 <script src="./vendor/jszip.min.js?v=1"></script>
 <script src="./document-import.js?v=1"></script>
+<script src="./subjects-ui.js?v=1"></script>
 <script src="/migration.js?v=1"></script>
 </body>
 </html>
