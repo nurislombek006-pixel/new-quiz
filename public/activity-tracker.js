@@ -7,6 +7,7 @@
   let opened=false;
   let sending=false;
   let lastOk=0;
+  let lastInteraction=Date.now();
 
   function initData(){
     try{return String(window.Telegram?.WebApp?.initData||'')}
@@ -14,6 +15,8 @@
   }
   async function heartbeat(){
     if(sending||document.hidden)return;
+    // A visible but abandoned Mini App must not appear continuously active.
+    if(opened&&Date.now()-lastInteraction>130000)return;
     const data=initData();
     if(!data)return;
     const now=Date.now();
@@ -38,8 +41,21 @@
   // A user is considered active only while their Mini App is visible.
   setTimeout(heartbeat,1200);
   setInterval(heartbeat,90000);
-  document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden)heartbeat();
+  function markInteraction(){
+    lastInteraction=Date.now();
+    if(opened&&Date.now()-lastOk>=70000)heartbeat();
+  }
+  ['pointerdown','touchstart','keydown','scroll'].forEach(name=>{
+    document.addEventListener(name,markInteraction,{passive:true});
   });
-  window.addEventListener('focus',heartbeat);
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden){
+      lastInteraction=Date.now();
+      heartbeat();
+    }
+  });
+  window.addEventListener('focus',()=>{
+    lastInteraction=Date.now();
+    heartbeat();
+  });
 })();
