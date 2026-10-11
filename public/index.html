@@ -319,6 +319,7 @@
   <link rel="stylesheet" href="./eco-final-patch.css?v=14"/>
 <link rel="stylesheet" href="./drawer-clarity.css?v=1"/>
 <link rel="stylesheet" href="./drawer-v2.css?v=1"/>
+<link rel="stylesheet" href="./ui-controls.css?v=1"/>
 </head>
 <body>
 <script>
@@ -336,50 +337,43 @@ setTimeout(function(){
 <div id="splash" class="splash"><div class="splash-logo"><div class="splash-mark">📈</div><div class="splash-title">Economy Pro</div><div class="splash-sub">Макроэкономика</div></div></div>
 <div id="auth-loading" class="loading-screen hidden"><div class="loader-card"><div class="spinner"></div><div id="auth-loading-text" style="font-weight:1000">Загрузка...</div><div class="muted" style="font-size:12px;margin-top:6px;font-weight:900">Подготавливаем сайт</div></div></div>
 
-<!-- ═══════════════ PAYWALL (активация только администратором) ═══════════════ -->
+<!-- ═══════════════ PAYWALL (активация администратором) ═══════════════ -->
 <div id="paywall" class="paywall hidden">
   <div class="paybox">
-    <button id="pay-close-btn" class="pay-close" type="button" onclick="hidePaywall()">×</button>
-    <div id="pay-icon" class="pay-icon">🔐</div>
+    <button id="pay-close-btn" class="pay-close" type="button" onclick="hidePaywall()" aria-label="Закрыть">×</button>
+    <div id="pay-icon" class="pay-icon">💎</div>
     <div id="pay-title" class="pay-title">Премиум-доступ</div>
-    <p id="pay-sub" class="pay-sub">Чтобы получить доступ к тестам без ограничений, оплатите подписку и отправьте данные администратору.</p>
-
-    <div class="pay-card">
-      <div class="pay-label">Ваш Telegram ID</div>
-      <div class="row">
-        <div id="pay-user-id" class="pay-value" style="flex:1">Определяется...</div>
-        <button class="copy" onclick="copyUserId()">📋</button>
-      </div>
-    </div>
-
-    <div class="pay-card">
-      <div class="pay-label">ID устройства</div>
-      <div class="row">
-        <div id="pay-device-id" class="pay-value" style="flex:1">Определяется...</div>
-        <button class="copy" onclick="copyDeviceId()">📋</button>
-      </div>
-    </div>
-
+    <p id="pay-sub" class="pay-sub">Тесты без ограничений</p>
     <div class="pay-card pay-card-payment">
-      <div class="pay-label">Оплата подписки</div>
       <div class="pay-price-box">
-        <div class="pay-price-title">Стоимость доступа</div>
+        <div class="pay-price-title">Стоимость подписки</div>
         <div class="pay-price">30 000 сум</div>
       </div>
-      <div class="pay-transfer-text">Переведите оплату на карту:</div>
+      <div class="pay-label">Номер карты</div>
       <div class="pay-card-number-row">
         <div id="pay-card-number" class="pay-card-number">5614 6805 7717 0398</div>
-        <button class="copy copy-card" onclick="copyCardNumber()">📋</button>
+        <button type="button" class="copy copy-card" onclick="copyCardNumber()" aria-label="Скопировать номер карты">📋</button>
       </div>
-      <button class="btn btn-amber btn-full" onclick="copyCardNumber()" style="margin-top:10px">💳 Скопировать номер карты</button>
-      <div class="pay-after-text">После оплаты отправьте чек администратору вместе с Telegram ID и ID устройства.</div>
-      <button class="btn btn-primary btn-full" onclick="copySubscriptionData()" style="margin-top:10px">📋 Скопировать данные для активации</button>
-      <a class="btn btn-green btn-full" href="https://t.me/nurislombekm" target="_blank" style="text-decoration:none;margin-top:8px">💬 Отправить чек @nurislombekm</a>
+      <button type="button" class="btn btn-primary btn-full" onclick="copySubscriptionData()" style="margin-top:9px">📋 Скопировать данные</button>
+      <a class="btn btn-green btn-full" href="https://t.me/nurislombekm" target="_blank" rel="noopener" style="text-decoration:none;margin-top:8px">💬 Отправить чек</a>
     </div>
-
+    <div class="pay-steps"><span>Оплата</span><span class="pay-step-dot"></span><span>Чек</span><span class="pay-step-dot"></span><span>Активация</span></div>
+    <details class="pay-extra-details" id="pay-extra-details">
+      <summary>Мои данные для активации</summary>
+      <div class="pay-extra-details-content">
+        <div class="pay-card">
+          <div class="pay-label">Telegram ID</div>
+          <div class="row"><div id="pay-user-id" class="pay-value" style="flex:1">Определяется...</div><button type="button" class="copy" onclick="copyUserId()" aria-label="Скопировать Telegram ID">📋</button></div>
+        </div>
+        <div class="pay-card">
+          <div class="pay-label">ID устройства</div>
+          <div class="row"><div id="pay-device-id" class="pay-value" style="flex:1">Определяется...</div><button type="button" class="copy" onclick="copyDeviceId()" aria-label="Скопировать ID устройства">📋</button></div>
+        </div>
+      </div>
+    </details>
     <div id="pay-error" class="pay-error"></div>
     <div id="pay-success-msg" class="pay-success hidden"></div>
-    <div id="pay-danger-note" class="danger-note">Доступ активируется вручную после проверки оплаты. Когда администратор подтвердит оплату, обновите сайт — статус станет «Премиум пользователь».</div>
+    <div id="pay-danger-note" class="danger-note"></div>
   </div>
 </div>
 
@@ -463,6 +457,19 @@ setTimeout(function(){
             <input id="range-to" class="simple-input" type="number" min="1" inputmode="numeric" placeholder="до">
           </div>
         </div>
+      </div>
+
+      <div class="setting-card scale-setting" id="ui-scale-setting">
+        <div class="ui-scale-header">
+          <label class="ui-scale-title" for="ui-scale-slider">🔍 Масштаб интерфейса</label>
+          <output class="ui-scale-value" id="ui-scale-value" for="ui-scale-slider">100%</output>
+        </div>
+        <div class="ui-scale-row">
+          <button type="button" class="ui-scale-adjust" id="ui-scale-minus" aria-label="Уменьшить масштаб">−</button>
+          <input type="range" class="ui-scale-slider" id="ui-scale-slider" min="60" max="180" step="5" value="100" aria-label="Масштаб интерфейса от 60 до 180 процентов">
+          <button type="button" class="ui-scale-adjust" id="ui-scale-plus" aria-label="Увеличить масштаб">+</button>
+        </div>
+        <div class="ui-scale-bottom"><span>60%</span><button type="button" class="ui-scale-reset" id="ui-scale-reset">Сбросить 100%</button><span>180%</span></div>
       </div>
 
       <div class="mini-note compact-total">Всего в базе: <span id="total-count">—</span></div>
@@ -824,7 +831,7 @@ async function checkAccess(showMsg=true){
   }
   if(hasPremium(id)){unlocked=true;updatePremiumBadge(true);hidePaywall();return true;}
   unlocked=false;
-  if(showMsg)showPaywall('Подписка не найдена для ID '+id+'. Оплатите 30 000 сум на карту 5614 6805 7717 0398 и отправьте чек @nurislombekm.');
+  if(showMsg)showPaywall('Подписка пока не активна.');
   return false;
 }
 
@@ -939,10 +946,10 @@ function resetPaywallMode(){
   if(p)p.classList.remove('blocked-mode');
   const icon=document.getElementById('pay-icon');if(icon)icon.textContent='🔐';
   const title=document.getElementById('pay-title');if(title)title.textContent='Премиум-доступ';
-  const sub=document.getElementById('pay-sub');if(sub)sub.textContent='Чтобы получить доступ к тестам без ограничений, оплатите подписку и отправьте данные администратору.';
-  const note=document.getElementById('pay-danger-note');if(note)note.textContent='Доступ активируется вручную после проверки оплаты. Когда администратор подтвердит оплату, обновите сайт — статус станет «Премиум пользователь».';
+  const sub=document.getElementById('pay-sub');if(sub)sub.textContent='Тесты без ограничений';
+  const note=document.getElementById('pay-danger-note');if(note)note.textContent='';
   const blocked=document.getElementById('blocked-contact-card');if(blocked)blocked.remove();
-  const e=document.getElementById('pay-error');if(e)e.style.color='';
+  const e=document.getElementById('pay-error');if(e){e.style.color='';e.textContent='';}
 }
 function showPaywall(msg=''){
   resetPaywallMode();
@@ -961,12 +968,12 @@ function showBlockedPaywall(reason=''){
   const sub=document.getElementById('pay-sub');if(sub)sub.textContent='Ваш аккаунт был заблокирован администрацией сайта.';
   const note=document.getElementById('pay-danger-note');if(note)note.textContent='Если вы считаете, что блокировка произошла по ошибке, свяжитесь с администратором.';
   if(!document.getElementById('blocked-contact-card')){
-    const deviceCard=document.getElementById('pay-device-id')?.closest?.('.pay-card');
+    const paymentCard=document.querySelector('#paywall .pay-card-payment');
     const card=document.createElement('div');
     card.id='blocked-contact-card';
     card.className='pay-card blocked-card';
     card.innerHTML=`<div class="blocked-main-text">Вы были заблокированы администрацией.</div><div class="blocked-small-text">Прохождение тестов и премиум-доступ для этого аккаунта временно недоступны.</div><a class="btn btn-red btn-full" href="https://t.me/nurislombekm" target="_blank" style="text-decoration:none">💬 Написать администратору</a>`;
-    if(deviceCard)deviceCard.insertAdjacentElement('afterend',card);
+    if(paymentCard)paymentCard.insertAdjacentElement('afterend',card);
   }
   const e=document.getElementById('pay-error');
   if(e){e.textContent=reason||'Причина: нарушение правил использования сайта.';e.style.color='#fca5a5';}
@@ -978,7 +985,7 @@ function clearPayMessages(){
   if(s){s.textContent='';s.classList.add('hidden');}
 }
 function showPayError(msg){const e=document.getElementById('pay-error');if(e)e.textContent=msg||'';}
-function openActivationPanel(){showPaywall('Для активации оплатите 30 000 сум на карту 5614 6805 7717 0398, затем отправьте чек, Telegram ID и ID устройства @nurislombekm.');}
+function openActivationPanel(){showPaywall();}
 function copyUserId(){navigator.clipboard?.writeText(String(tgUserId||''))}
 function copyDeviceId(){navigator.clipboard?.writeText(String(getDeviceFingerprint()))}
 function copyCardNumber(){
@@ -1522,5 +1529,6 @@ function waitForTelegram(maxMs=700){
 <script src="./eco-final-patch.js?v=30" defer></script>
 <script src="./admin-embed.js?v=7" defer></script>
 <script src="./activity-tracker.js?v=1" defer></script>
+<script src="./ui-scale.js?v=1" defer></script>
 </body>
 </html>
