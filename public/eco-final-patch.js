@@ -144,7 +144,7 @@ window.copyCardNumber=function(){navigator.clipboard?.writeText('5614 6805 7717 
     const uid=$('#pay-user-id');if(uid)uid.textContent=tgId()||'Откройте через Telegram Mini App';
     const dev=$('#pay-device-id');if(dev)dev.textContent=typeof getDeviceFingerprint==='function'?getDeviceFingerprint():'-';
     const pay=$('#paywall');if(pay)pay.classList.remove('hidden');
-    const err=$('#pay-error');if(err){err.style.color='#f87171';err.textContent='Оплатите 30 000 сум на карту 5614 6805 7717 0398, затем отправьте чек, Telegram ID и ID устройства @'+ADMIN+'.';}
+    const err=$('#pay-error');if(err){err.style.color='';err.textContent='';}
   };
   window.showPaywall=function(msg=''){
     window.openSubscriptionModal();
@@ -162,13 +162,13 @@ window.copyCardNumber=function(){navigator.clipboard?.writeText('5614 6805 7717 
     const rec=premiumRec(id);
     if(!rec){
       window.unlocked=false;updateBadge();renderLimit();
-      if(showMsg)showPaywall('Подписка не найдена для ID '+id+'. Проверьте доступ в закрытом backend и обновите сайт.');
+      if(showMsg)showPaywall('Подписка пока не активна.');
       return false;
     }
     if(!activeRec(rec)){
       window.unlocked=false;updateBadge();renderLimit();
       const until=(rec&&typeof rec==='object')?(rec.expires||rec.exp||rec.until||''):'';
-      if(showMsg)showPaywall('Подписка для ID '+id+' не активна'+(until?' или срок истёк: '+until:'')+'. Для продления оплатите 30 000 сум на карту 5614 6805 7717 0398 и отправьте чек @'+ADMIN+'.');
+      if(showMsg)showPaywall('Срок подписки истёк.');
       return false;
     }
     const devReason=recDeviceReason(rec) || (typeof deviceLockReason==='function'?deviceLockReason(id):'');
