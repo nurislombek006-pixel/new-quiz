@@ -2,10 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
-import {createRequire} from 'node:module';
-
-const require=createRequire(import.meta.url);
-const JSZip=require('../public/admin/vendor/jszip.min.js');
+// Load the vendored browser UMD build exactly as Telegram WebView does.
+const vendorContext={window:{},console,Promise,Uint8Array,ArrayBuffer,TextEncoder,TextDecoder,Buffer,setTimeout,clearTimeout};
+vm.createContext(vendorContext);
+vm.runInContext(readFileSync('public/admin/vendor/jszip.min.js','utf8'),vendorContext);
+const JSZip=vendorContext.window.JSZip;
+assert.equal(typeof JSZip,'function','Bundled JSZip must be available globally in browsers');
 const script=readFileSync('public/admin/document-import.js','utf8');
 const backend=readFileSync('cloudflare/backend.mjs','utf8');
 const admin=readFileSync('public/admin/index.html','utf8');
