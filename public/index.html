@@ -289,9 +289,35 @@
       .real-q{padding:11px}.real-option{padding:9px;font-size:14px}
       .real-result-actions{grid-template-columns:1fr}.list-title-row .btn{min-width:86px}
     }
+
+
+    /* Lightweight, accessible motion + prominent subject switching in the home screen. */
+    .subject-home-picker{margin:14px 0 12px;padding:12px;border:1px solid var(--line);border-radius:17px;background:var(--card2)}
+    .subject-home-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;font-size:13px;font-weight:850;color:var(--txt)}
+    .subject-refresh{font-size:12px;font-weight:800;cursor:pointer;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--txt);padding:6px 9px;transition:transform .17s ease,opacity .17s ease}
+    .subject-refresh:disabled{opacity:.5;cursor:wait}
+    .subject-choice-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .subject-choice{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0;padding:11px 10px;background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:13px;cursor:pointer;text-align:left;transition:transform .18s cubic-bezier(.2,.8,.2,1),border-color .18s ease,background-color .18s ease,box-shadow .18s ease;animation:subject-appear .22s ease both}
+    .subject-choice[aria-pressed="true"]{background:rgba(37,99,235,.13);border-color:#60a5fa;box-shadow:0 0 0 1px rgba(96,165,250,.18)}
+    .subject-choice:focus-visible{outline:2px solid #38bdf8;outline-offset:2px}
+    .subject-choice:active,.subject-refresh:active{transform:scale(.975)}
+    .subject-choice-label{font-size:13px;font-weight:850;line-height:1.25;overflow-wrap:anywhere}
+    .subject-choice-count{font-size:11px;color:var(--muted);font-weight:650}
+    .subject-feedback{min-height:0;margin-top:6px;color:var(--muted);font-size:11px;line-height:1.3}
+    .screen:not(.hidden){animation:screen-enter .24s cubic-bezier(.2,.8,.2,1) both}
+    .btn,.mode-tab,.seg button,.icon-btn,.menu-toggle{transition:transform .16s cubic-bezier(.2,.8,.2,1),background-color .18s ease,border-color .18s ease,box-shadow .18s ease}
+    .btn:active,.mode-tab:active,.seg button:active,.icon-btn:active,.menu-toggle:active{transform:scale(.97)}
+    @keyframes screen-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes subject-appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:350px){.subject-choice-list{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){
+      .screen:not(.hidden),.subject-choice{animation:none}
+      .subject-choice,.subject-refresh,.btn,.mode-tab,.seg button,.icon-btn,.menu-toggle{transition:none}
+    }
   </style>
   <link rel="stylesheet" href="./eco-upgrade.css?v=3"/>
   <link rel="stylesheet" href="./eco-final-patch.css?v=14"/>
+  <link rel="stylesheet" href="./tsue-theme.css?v=20261011"/>
 </head>
 <body>
 <script>
@@ -377,6 +403,12 @@ setTimeout(function(){
       <h1 class="title">Добро пожаловать</h1>
       <div class="welcome-subject">Макроэкономика</div>
       <div id="user-badge" class="user-badge"></div>
+    </div>
+
+    <div class="subject-home-picker" id="subject-home-picker" aria-label="Выбор предмета">
+      <div class="subject-home-heading"><span>📚 Выберите предмет</span><button type="button" class="subject-refresh" id="subject-refresh-btn" onclick="refreshSubjectCatalog()">↻ Обновить</button></div>
+      <div class="subject-choice-list" id="subject-choice-list" role="group" aria-label="Доступные предметы"></div>
+      <div class="subject-feedback" id="subject-feedback" role="status" aria-live="polite"></div>
     </div>
 
     <!-- Resume card -->
@@ -975,6 +1007,46 @@ function fillSubjectSelect(){
   }).join('');
   sel.value=window.currentSubjectKey||entries[0]?.[0]||'macro';
   sel.disabled=entries.length<2;
+  renderSubjectChoices();
+}
+function renderSubjectChoices(){
+  const root=document.getElementById('subject-choice-list');
+  if(!root)return;
+  const entries=getSubjectEntries({subjects});
+  root.replaceChildren();
+  for(const [key,sub] of entries){
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='subject-choice';
+    button.setAttribute('aria-pressed',String(String(key)===String(window.currentSubjectKey)));
+    const title=document.createElement('span');
+    title.className='subject-choice-label';
+    title.textContent=(sub?.emoji||'📚')+' '+(sub?.short||sub?.title||sub?.name||key);
+    const count=document.createElement('span');
+    count.className='subject-choice-count';
+    const n=Array.isArray(sub?.tests)?sub.tests.length:0;
+    count.textContent=n+' вопросов';
+    button.append(title,count);
+    button.addEventListener('click',()=>switchSubject(key));
+    root.append(button);
+  }
+}
+async function refreshSubjectCatalog(){
+  const button=document.getElementById('subject-refresh-btn');
+  if(button?.disabled)return;
+  if(button){button.disabled=true;button.textContent='Обновляем…';}
+  try{
+    delete jsonCache[apiUrl('/api/tests')];
+    await loadTests(true);
+    document.getElementById('resume-card')?.classList.add('hidden');
+    showResumeIfAny();
+    const feedback=document.getElementById('subject-feedback');
+    if(feedback)feedback.textContent='Список предметов обновлён.';
+  }catch(error){
+    showConfigError('Не удалось обновить предметы. Проверьте подключение к серверу.');
+  }finally{
+    if(button){button.disabled=false;button.textContent='↻ Обновить';}
+  }
 }
 function setCurrentSubject(key,opts={}){
   const entries=getSubjectEntries({subjects});
@@ -998,9 +1070,20 @@ function setCurrentSubject(key,opts={}){
 }
 function switchSubject(key){
   if(String(key)===String(window.currentSubjectKey))return;
-  setCurrentSubject(key,{keepSession:false});
-  showConfigError('Предмет изменён: '+getSubjectTitle()+'. Можно начинать тест.');
-  setTimeout(hideConfigError,1800);
+  if(!Object.prototype.hasOwnProperty.call(subjects,key)){fillSubjectSelect();return;}
+  const active=document.querySelector('.screen:not(.hidden)');
+  if(active&&(active.id==='test-screen'||active.id==='real-exam-screen')){
+    if(!confirm('Перейти к другому предмету? Текущий тест будет остановлен.')){fillSubjectSelect();return;}
+    if(active.id==='test-screen')saveActiveSession(true);
+  }
+  if(active&&active.id!=='start-screen')backToMenu();
+  // Keep per-subject saved attempts; switching must not delete them.
+  setCurrentSubject(key,{keepSession:true});
+  document.getElementById('resume-card')?.classList.add('hidden');
+  showResumeIfAny();
+  hideConfigError();
+  const feedback=document.getElementById('subject-feedback');
+  if(feedback)feedback.textContent='Выбран предмет: '+getSubjectTitle();
 }
 function applySubjectMeta(data){
   subjects=data?.subjects||subjects||{};
@@ -1019,8 +1102,8 @@ function normalizeTests(data){
   const sk=cleanSubjectKey(window.currentSubjectKey||'macro');
   return tests.map((q,i)=>({...q,num:i+1,id:q.id||`${sk}-q-${i+1}`,answer:Number(q.answer)||0,generated:!!q.generated,options:q.options||[]}));
 }
-async function loadTests(){
-  const data=await fetchJsonSafe(apiUrl('/api/tests'),null,5000,60000);
+async function loadTests(force=false){
+  const data=await fetchJsonSafe(apiUrl(force?'/api/tests?refresh=1':'/api/tests'),null,7000,force?0:60000);
   if(!data)throw new Error('База вопросов не загрузилась из backend API');
   subjects=data.subjects||{};applySubjectMeta(data);
   document.getElementById('total-count').innerText=database.length;

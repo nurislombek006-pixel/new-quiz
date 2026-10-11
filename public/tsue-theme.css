@@ -1,0 +1,260 @@
+/* TSUEQuiz visual refresh — serene blue / lavender / sea-glass palette.
+   Styling only: no test, premium, access or data behavior changes. */
+
+:root{
+  --bg:#edf3ff;
+  --bg2:#f7f9ff;
+  --card:#ffffff;
+  --card2:#f1f5ff;
+  --line:#dce6f5;
+  --txt:#23314c;
+  --muted:#64758e;
+  --blue:#526be6;
+  --cyan:#0da9a2;
+  --green:#108a79;
+  --red:#db5670;
+  --amber:#d79835;
+  --purple:#8573d9;
+  --shadow:0 18px 45px rgba(53,82,142,.11);
+  --theme-glow:rgba(82,107,230,.14);
+  --theme-primary:linear-gradient(115deg,#526be6 0%,#6b82ed 60%,#8573d9 100%);
+  --theme-glass:rgba(255,255,255,.94);
+  color-scheme:light;
+}
+body.light{
+  --bg:#edf3ff;
+  --bg2:#f7f9ff;
+  --card:#ffffff;
+  --card2:#f1f5ff;
+  --line:#dce6f5;
+  --txt:#23314c;
+  --muted:#64758e;
+  --blue:#526be6;
+  --cyan:#0da9a2;
+  --green:#108a79;
+  --red:#db5670;
+  --purple:#8573d9;
+  --theme-glow:rgba(82,107,230,.14);
+  --theme-glass:rgba(255,255,255,.94);
+}
+body:not(.light){
+  --bg:#0d1629;
+  --bg2:#121e35;
+  --card:#18253d;
+  --card2:#122039;
+  --line:#30425e;
+  --txt:#f2f6ff;
+  --muted:#afc0d9;
+  --blue:#9aaaff;
+  --cyan:#70dcd5;
+  --green:#66d7be;
+  --red:#ffa0af;
+  --purple:#b6a7ff;
+  --theme-glow:rgba(127,149,255,.16);
+  --theme-glass:rgba(25,39,63,.96);
+  color-scheme:dark;
+}
+html{background:#edf3ff;}
+body.light{
+  background:
+    radial-gradient(ellipse 95% 52% at 15% -4%,rgba(139,177,253,.19),transparent 75%),
+    radial-gradient(ellipse 60% 65% at 104% 105%,rgba(162,164,244,.18),transparent 76%),
+    linear-gradient(165deg,#f8fbff 0%,#eff5ff 55%,#f3f0ff 100%)!important;
+}
+body:not(.light){
+  background:
+    radial-gradient(ellipse 95% 65% at 0% -12%,rgba(85,117,214,.18),transparent 70%),
+    radial-gradient(ellipse 85% 65% at 110% 110%,rgba(111,101,195,.16),transparent 70%),
+    linear-gradient(160deg,#0b1324 0%,#101c32 63%,#151c38 100%)!important;
+}
+body{color:var(--txt);accent-color:#6179e6}
+body.light .card,body.light .panel,body.light .item{
+  background:rgba(255,255,255,.96)!important;
+  border-color:#e0e8f5!important;
+}
+body:not(.light) .card,body:not(.light) .panel,body:not(.light) .item{
+  background:var(--theme-glass)!important;
+  border-color:var(--line)!important;
+}
+.card{box-shadow:var(--shadow)!important}
+body:not(.light) .card{box-shadow:0 20px 44px rgba(4,9,24,.22)!important}
+.title,.question,.item-q{color:var(--txt)}
+.welcome-subject,body:not(.light) .welcome-subject{
+  color:var(--blue)!important;
+  font-weight:850;
+}
+body.light .menu-toggle,body.light .icon-btn{
+  background:rgba(255,255,255,.92)!important;
+  color:#30426b!important;
+  border-color:#dae4f4!important;
+}
+body:not(.light) .menu-toggle,body:not(.light) .icon-btn{
+  background:#253754!important;
+  color:#f1f5ff!important;
+  border-color:#3d5275!important;
+}
+.subject-select{
+  border-color:rgba(221,230,253,.68)!important;
+  background:linear-gradient(120deg,rgba(60,78,137,.94),rgba(94,104,173,.93))!important;
+  box-shadow:0 10px 24px rgba(56,73,130,.13)!important;
+  color:#fff!important;
+}
+body:not(.light) .subject-select{background:linear-gradient(120deg,#263a63,#383f77)!important}
+.subject-home-picker{
+  background:linear-gradient(135deg,#f7faff,#f3f5ff)!important;
+  border-color:#dce5f6!important;
+}
+body:not(.light) .subject-home-picker{
+  background:linear-gradient(135deg,#172641,#1c2b49)!important;
+  border-color:var(--line)!important;
+}
+.subject-choice{
+  background:#fff!important;
+  border-color:#e0e8f5!important;
+  box-shadow:0 3px 10px rgba(69,93,148,.035);
+}
+body:not(.light) .subject-choice{background:#1b2b48!important;border-color:#344966!important}
+.subject-choice[aria-pressed="true"]{
+  background:linear-gradient(125deg,#eaf0ff,#f0efff)!important;
+  border-color:#8197f7!important;
+  box-shadow:0 0 0 1px rgba(89,113,231,.12),0 8px 19px rgba(89,113,231,.07)!important;
+}
+body:not(.light) .subject-choice[aria-pressed="true"]{
+  background:linear-gradient(125deg,#2b3e70,#323d69)!important;
+  border-color:#8da2ff!important;
+}
+.subject-refresh{background:var(--card)!important;color:var(--blue)!important;border-color:var(--line)!important}
+.subject-choice-count,.subject-feedback{color:var(--muted)}
+.mode-tabs,.seg{background:var(--card2)!important;border-color:var(--line)!important}
+.mode-tab,.seg button{color:var(--txt)!important}
+.mode-tab.active,.seg button.active{
+  background:var(--theme-primary)!important;
+  border-color:transparent!important;
+  color:#fff!important;
+  box-shadow:0 8px 18px rgba(79,104,200,.16)!important;
+}
+body.light .setting-card,body.light .simple-config .panel{
+  background:#f7f9ff!important;
+  border-color:#e0e7f3!important;
+}
+body:not(.light) .setting-card{
+  background:#202f4b!important;
+  border-color:#354a68!important;
+}
+.simple-label,body:not(.light) .simple-label{color:var(--txt)!important}
+.simple-input,.search,.simple-select{
+  background:var(--card2)!important;
+  color:var(--txt)!important;
+  border-color:var(--line)!important;
+}
+.simple-input::placeholder,.search::placeholder{color:var(--muted)!important;opacity:.8}
+.simple-input:focus,.search:focus,.subject-select:focus-visible{
+  outline:2px solid rgba(110,138,240,.6)!important;
+  outline-offset:1px;
+}
+.btn-primary,.menu-main-btn{
+  background:var(--theme-primary)!important;
+  color:#fff!important;
+  box-shadow:0 12px 24px rgba(79,104,200,.18)!important;
+}
+.btn-cyan{background:linear-gradient(115deg,#109baf,#32b6b0)!important;color:#fff!important}
+.btn-green{background:linear-gradient(115deg,#118e7a,#1eaa93)!important;color:#fff!important}
+.btn-gray{background:#e5ecf8!important;color:#31415f!important}
+body:not(.light) .btn-gray{background:#2a3b5d!important;color:#f3f6ff!important}
+.option,.real-option{
+  background:var(--card2)!important;
+  border-color:var(--line)!important;
+  color:var(--txt)!important;
+}
+.option.selected,.real-option.selected{
+  background:rgba(93,121,226,.10)!important;
+  border-color:#7188ee!important;
+  box-shadow:0 0 0 2px rgba(105,131,232,.10)!important;
+}
+body:not(.light) .option.selected,body:not(.light) .real-option.selected{
+  background:rgba(136,157,255,.14)!important;
+  border-color:#90a6ff!important;
+}
+.option.correct,.real-option.correct{background:#178d77!important;color:#fff!important;border-color:#12826d!important}
+.option.wrong,.real-option.wrong{background:#c94f69!important;color:#fff!important;border-color:#b43d5a!important}
+.timer,.real-time{color:var(--cyan)!important}
+.q-dot.current,.scroll-top-upgrade{background:var(--theme-primary)!important}
+body.light .side-drawer{
+  background:#f9fbff!important;
+  border-color:#dfe7f5!important;
+}
+body:not(.light) .side-drawer{
+  background:#142039!important;
+  border-color:#354764!important;
+}
+body.light .drawer-section{
+  background:rgba(245,248,255,.90)!important;
+  border-color:#e0e8f5!important;
+}
+body:not(.light) .drawer-section{
+  background:rgba(33,48,77,.66)!important;
+  border-color:#344963!important;
+}
+.drawer-item{box-shadow:none!important}
+body.light .drawer-item:not(.drawer-premium){
+  background:#f1f5ff!important;
+  color:#354a76!important;
+  border:1px solid #e2e9f6!important;
+}
+body:not(.light) .drawer-item:not(.drawer-premium){
+  background:#223452!important;
+  color:#e5efff!important;
+  border:1px solid #334b6c!important;
+}
+.drawer-item.drawer-premium,.premium-badge:not(.ordinary){
+  background:linear-gradient(115deg,#ffdf9b,#eab86f)!important;
+  color:#483214!important;
+  border-color:#efcb90!important;
+  box-shadow:0 8px 20px rgba(192,143,54,.15)!important;
+}
+.premium-badge.ordinary{background:linear-gradient(115deg,#e1e9f8,#ccd9ee)!important;color:#33415d!important}
+body:not(.light) .premium-badge.ordinary{background:linear-gradient(115deg,#344561,#293b58)!important;color:#ebf1fd!important}
+.sticky-list-head,body.light .sticky-list-head{
+  background:rgba(250,252,255,.98)!important;
+  border-color:#dfe7f4!important;
+}
+body:not(.light) .sticky-list-head{
+  background:rgba(25,40,63,.97)!important;
+  border-color:#3b4d69!important;
+}
+#real-fixed-top,body.light #real-fixed-top{
+  background:rgba(251,252,255,.97)!important;
+  border-color:#dfe7f4!important;
+}
+body:not(.light) #real-fixed-top{
+  background:rgba(25,39,63,.98)!important;
+  border-color:#394c6b!important;
+}
+.real-fixed-fill{background:linear-gradient(90deg,#48c2bd,#839bf7)!important}
+#usage-limit-note.limit-ready.limit-compact{
+  background:rgba(100,127,227,.12)!important;
+  border-color:rgba(100,127,227,.28)!important;
+}
+body.light #usage-limit-note.limit-ready.limit-compact{color:#3b528c!important}
+body:not(.light) #usage-limit-note.limit-ready.limit-compact{color:#d9e5ff!important}
+body.light .offer-box{background:#fff!important;border-color:#dfe7f4!important;color:#263653!important}
+body:not(.light) .offer-box{background:#1b2b45!important;border-color:#3a4e6b!important;color:#f4f7ff!important}
+body.light .offer-card{background:#f4f7ff!important;border-color:#dce5f4!important}
+body:not(.light) .offer-card{background:#243753!important;border-color:#39516e!important}
+/* Keep the payment dialog dark in both modes: card labels and account text are white. */
+body.light .paybox,body:not(.light) .paybox{background:#192943!important;color:#f2f6ff!important;border-color:#405475!important}
+body.light .pay-card,body:not(.light) .pay-card{background:#203350!important;color:#f2f6ff!important;border-color:#415777!important}
+.pay-icon,.splash-mark{background:var(--theme-primary)!important}
+body.light .splash,body:not(.light) .splash{background:radial-gradient(circle at 50% 20%,rgba(131,149,243,.25),transparent 42%),linear-gradient(180deg,#1d2c50,#0e1730)!important}
+body.light .pay-card-number-row,body:not(.light) .pay-card-number-row{background:#14243d!important;border-color:#4f7baf!important}
+body.light .pay-input,body:not(.light) .pay-input{background:#12243e!important;border-color:#476081!important;color:#fff!important}
+.btn:hover,.mode-tab:hover,.subject-choice:hover,.drawer-item:hover{
+  filter:brightness(1.025);
+}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
+  .subject-choice:hover{transform:translateY(-2px)}
+  .card:not(#start-screen):hover{border-color:rgba(119,147,230,.24)}
+}
+@media(prefers-reduced-motion:reduce){
+  .btn,.mode-tab,.subject-choice,.drawer-item{transition:none!important}
+}

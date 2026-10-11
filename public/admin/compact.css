@@ -59,3 +59,30 @@ body.admin-embedded #questions .question-fold>.card>h2:first-child{display:none}
 body.admin-embedded .fold-inline{padding:0 8px;margin:10px 0}
 body.admin-embedded .fold-inline>summary{padding:9px 3px;font-size:12px}
 body.admin-embedded #banReason{min-height:70px}
+
+
+/* Users: one-line overview, full details only on tap. */
+body.admin-embedded .person{padding:0;overflow:hidden;transition:border-color .18s ease,background .18s ease,transform .18s ease}
+body.admin-embedded .person[open]{border-color:#4472bb;background:#11213b}
+body.admin-embedded .person-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;cursor:pointer;list-style:none;min-height:64px}
+body.admin-embedded .person-summary::-webkit-details-marker{display:none}
+body.admin-embedded .person-summary:focus-visible{outline:2px solid #69a7ff;outline-offset:-3px;border-radius:13px}
+body.admin-embedded .person-identity{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+body.admin-embedded .person-summary .person-name{font-size:13px;line-height:1.25}
+body.admin-embedded .person-summary .person-handle{font-size:11px;margin-top:1px}
+body.admin-embedded .person-summary .person-id{display:block;margin-top:3px;font-size:10px}
+body.admin-embedded .person-summary-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+body.admin-embedded .person-chevron{display:inline-block;color:#9cb4d9;font-size:18px;transition:transform .2s ease}
+body.admin-embedded .person[open] .person-chevron{transform:rotate(180deg)}
+body.admin-embedded .person-detail{padding:0 11px 11px;border-top:1px solid #263959;animation:person-detail-in .2s ease both}
+body.admin-embedded .person-detail .person-time{margin-top:10px}
+body.admin-embedded .person-detail .person-time>div{margin-top:3px}
+@keyframes person-detail-in{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+body.admin-embedded .tab,body.admin-embedded .btn{transition:transform .16s ease,background-color .18s ease,border-color .18s ease,opacity .18s ease}
+body.admin-embedded .tab:active,body.admin-embedded .btn:active{transform:scale(.97)}
+body.admin-embedded .pane.active{animation:panel-in .22s cubic-bezier(.2,.8,.2,1) both}
+@keyframes panel-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+ body.admin-embedded .person,body.admin-embedded .person-chevron,body.admin-embedded .tab,body.admin-embedded .btn{transition:none}
+ body.admin-embedded .person-detail,body.admin-embedded .pane.active{animation:none}
+}
