@@ -141,16 +141,18 @@
 window.copyCardNumber=function(){navigator.clipboard?.writeText('5614 6805 7717 0398');const e=$('#pay-error');if(e){e.style.color='#38bdf8';e.textContent='Номер карты скопирован: 5614 6805 7717 0398';}};
   window.copySubscriptionData=function(){navigator.clipboard?.writeText(subscriptionText());const e=$('#pay-error');if(e){e.style.color='#38bdf8';e.textContent='Данные скопированы. Отправьте их вместе с чеком @'+ADMIN+'.';}};
   window.openSubscriptionModal=function(){
+    if(window.__quizbotHardBlocked){if(typeof showBlockedPaywall==='function')showBlockedPaywall();return;}
     const uid=$('#pay-user-id');if(uid)uid.textContent=tgId()||'Откройте через Telegram Mini App';
     const dev=$('#pay-device-id');if(dev)dev.textContent=typeof getDeviceFingerprint==='function'?getDeviceFingerprint():'-';
     const pay=$('#paywall');if(pay)pay.classList.remove('hidden');
     const err=$('#pay-error');if(err){err.style.color='';err.textContent='';}
   };
   window.showPaywall=function(msg=''){
+    if(window.__quizbotHardBlocked){if(typeof showBlockedPaywall==='function')showBlockedPaywall();return;}
     window.openSubscriptionModal();
     const e=$('#pay-error');if(e&&msg){e.style.color='#f87171';e.textContent=msg;}
   };
-  window.hidePaywall=function(){ $('#paywall')?.classList.add('hidden'); };
+  window.hidePaywall=function(){ if(window.__quizbotHardBlocked){if(typeof showBlockedPaywall==='function')showBlockedPaywall();return;} $('#paywall')?.classList.add('hidden'); };
   window.activateAccessCode=function(){ window.openSubscriptionModal(); };
   window.checkAccess=async function(showMsg=true){
     if(typeof loadLists==='function'){
@@ -158,7 +160,7 @@ window.copyCardNumber=function(){navigator.clipboard?.writeText('5614 6805 7717 
     }
     const id=tgId();
     if(!id){updateBadge();if(showMsg)showPaywall('Откройте сайт через Telegram Mini App, чтобы получить Telegram ID.');return false;}
-    try{const b=typeof banReason==='function'?banReason(id):'';if(b){updateBadge();if(typeof clearLocalCode==='function')clearLocalCode();if(showMsg)showPaywall(b);return false;}}catch(e){}
+    try{const b=typeof banReason==='function'?banReason(id):'';if(b){updateBadge();if(typeof clearLocalCode==='function')clearLocalCode();if(typeof showBlockedPaywall==='function')showBlockedPaywall();return false;}}catch(e){}
     const rec=premiumRec(id);
     if(!rec){
       window.unlocked=false;updateBadge();renderLimit();
