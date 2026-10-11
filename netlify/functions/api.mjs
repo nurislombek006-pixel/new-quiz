@@ -469,6 +469,9 @@ async function adminOwnerOk(request, env){
   const tokens = [...new Set([
     env.APP_BOT_TOKEN, env.WEBAPP_BOT_TOKEN, env.QUIZBOT_TOKEN, env.BOT_TOKEN
   ].filter(token=>typeof token==='string' && token.trim()))];
+  if(!tokens.length && !new URLSearchParams(initData).get('signature')){
+    return {ok:false,status:503,code:'TELEGRAM_BOT_NOT_CONFIGURED',message:'Нет токена Netlify и публичной подписи Telegram для проверки Mini App.'};
+  }
   let signedUser = null;
   for(const token of tokens){
     signedUser = await verifyTelegramInitData(initData, token);
