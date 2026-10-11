@@ -293,6 +293,7 @@
   <link rel="stylesheet" href="./eco-upgrade.css?v=3"/>
   <link rel="stylesheet" href="./eco-final-patch.css?v=14"/>
   <link rel="stylesheet" href="./soft-type.css?v=2"/>
+  <link rel="stylesheet" href="./subject-picker.css?v=1"/>
 </head>
 <body>
 <script>
@@ -364,6 +365,7 @@ setTimeout(function(){
       <select id="subject-select" class="subject-select" onchange="switchSubject(this.value)">
         <option value="macro">📚 Маркетинг</option>
       </select>
+      <button type="button" id="subject-picker-trigger" class="subject-picker-trigger" aria-haspopup="dialog" aria-expanded="false">Выбрать предмет</button>
     </div>
     <div class="top-right">
       <span id="premium-badge" class="premium-badge hidden"></span>
@@ -1414,5 +1416,6 @@ function waitForTelegram(maxMs=700){
 <script src="./eco-final-patch.js?v=30" defer></script>
 <script src="./admin-embed.js?v=7" defer></script>
 <script src="./activity-tracker.js?v=1" defer></script>
+<script src="./subject-picker.js?v=1" defer></script>
 </body>
 </html>
