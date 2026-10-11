@@ -1,0 +1,12 @@
+{
+  "name": "quizbot-astor-migration",
+  "main": "cloudflare/worker.mjs",
+  "compatibility_date": "2026-10-11",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "quizbot-astor-data",
+      "database_id": "cea9f28b-1c64-417b-a19f-cc7868f7e3fc"
+    }
+  ]
+}

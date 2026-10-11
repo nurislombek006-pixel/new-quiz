@@ -1,0 +1,115 @@
+/* QuizBot subject chooser: centered pill + phone-friendly subject list.
+   The original select remains in DOM for older clients and fallback. */
+.subject-picker-trigger{display:none}
+body.subject-picker-ready .topbar .subject-switch-wrap{z-index:5!important}
+body.subject-picker-ready .topbar #subject-select{pointer-events:none!important;opacity:0!important}
+body.subject-picker-ready .topbar .subject-picker-trigger{
+  display:block!important;position:absolute!important;inset:0!important;
+  width:100%!important;height:39px!important;
+  border:1px solid rgba(156,173,208,.35)!important;border-radius:999px!important;
+  background:rgba(240,245,255,.86)!important;color:#34445f!important;
+  font-size:12.5px!important;font-weight:500!important;line-height:39px!important;
+  padding:0 29px 0 11px!important;box-sizing:border-box!important;
+  cursor:pointer!important;text-align:left!important;text-overflow:ellipsis!important;
+  white-space:nowrap!important;overflow:hidden!important;touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent;z-index:2!important;
+}
+body:not(.light).subject-picker-ready .topbar .subject-picker-trigger{
+  background:rgba(18,30,56,.72)!important;color:#fff!important;
+}
+body.subject-picker-ready .topbar .subject-switch-wrap:after{z-index:3!important}
+body.subject-picker-open{overflow:hidden!important}
+.subject-picker-layer{
+  position:fixed;inset:0;z-index:2147483000;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(2,8,23,.72);backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+  padding:16px;box-sizing:border-box;
+}
+.subject-picker-panel{
+  width:min(430px,100%);max-height:calc(100dvh - 44px);overflow:auto;
+  background:#111d33;color:#e8f0ff;
+  border:1px solid #415574;border-radius:19px;
+  padding:15px;box-shadow:0 22px 60px rgba(0,0,0,.4);
+}
+.subject-picker-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.subject-picker-heading h2{font-weight:600!important;font-size:18px;line-height:1.3;margin:0!important;color:#eef5ff}
+.subject-picker-close{width:34px;height:34px;flex:none;border:1px solid #384b67;border-radius:11px;background:#223553;color:#e8f1ff;font-size:18px;cursor:pointer}
+.subject-picker-note{margin:7px 0 11px;font-size:12px!important;color:#b1bfd8;line-height:1.4}
+.subject-picker-items{display:grid;gap:8px;max-height:55dvh;overflow-y:auto}
+.subject-picker-item{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  min-height:51px;padding:11px 13px;border-radius:13px;
+  border:1px solid #364866;background:#1a2b46;color:#eff5ff;
+  text-align:left;font-size:13px;font-weight:500;cursor:pointer;
+}
+.subject-picker-item.selected{border-color:#4d91ff;background:#183d80}
+.subject-picker-label{flex:1;min-width:0;overflow-wrap:anywhere}
+.subject-picker-count{flex:none;white-space:nowrap;font-size:11px;color:#acc6e8}
+.subject-picker-reload{width:100%;min-height:40px;margin-top:11px;border-radius:12px;border:1px solid #3e587a;background:#243958;color:#eef6ff;font-size:12px;font-weight:500;cursor:pointer}
+.subject-picker-reload:disabled{opacity:.6}
+.subject-picker-empty{font-size:13px;color:#bfcae0;padding:8px}
+@media(max-width:420px){
+ .subject-picker-layer{padding:10px}
+ .subject-picker-panel{padding:12px;border-radius:15px}
+ .subject-picker-item{font-size:12px}
+}
+
+/* Smooth open / close and option movement without heavy layout animations. */
+@media(prefers-reduced-motion:no-preference){
+  .subject-picker-layer{
+    animation:qb-picker-backdrop-in 160ms ease-out both;
+  }
+  .subject-picker-layer.is-closing{
+    animation:qb-picker-backdrop-out 155ms ease-in both;
+    pointer-events:none;
+  }
+  .subject-picker-panel{
+    animation:qb-picker-panel-in 195ms cubic-bezier(.18,.82,.22,1) both;
+  }
+  .subject-picker-layer.is-closing .subject-picker-panel{
+    animation:qb-picker-panel-out 150ms ease-in both;
+  }
+  @keyframes qb-picker-backdrop-in{
+    from{opacity:0}to{opacity:1}
+  }
+  @keyframes qb-picker-backdrop-out{
+    from{opacity:1}to{opacity:0}
+  }
+  @keyframes qb-picker-panel-in{
+    from{opacity:.55;transform:translate3d(0,10px,0) scale(.97)}
+    to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+  }
+  @keyframes qb-picker-panel-out{
+    from{opacity:1;transform:translate3d(0,0,0) scale(1)}
+    to{opacity:.6;transform:translate3d(0,6px,0) scale(.985)}
+  }
+  .subject-picker-item{
+    transition:transform 145ms cubic-bezier(.2,.82,.25,1),
+      border-color 145ms ease,background-color 145ms ease,box-shadow 145ms ease!important;
+  }
+  .subject-picker-item:active{transform:scale(.975)}
+  @media(hover:hover) and (pointer:fine){
+    .subject-picker-item:hover{transform:translate3d(0,-1px,0);border-color:#5c8de3}
+  }
+  .subject-picker-item:nth-child(-n+8){
+    animation:qb-picker-item-in 175ms cubic-bezier(.2,.82,.25,1) both;
+  }
+  .subject-picker-item:nth-child(2){animation-delay:20ms}
+  .subject-picker-item:nth-child(3){animation-delay:40ms}
+  .subject-picker-item:nth-child(4){animation-delay:60ms}
+  .subject-picker-item:nth-child(5){animation-delay:80ms}
+  .subject-picker-item:nth-child(6){animation-delay:100ms}
+  @keyframes qb-picker-item-in{
+    from{opacity:.55;transform:translate3d(0,5px,0)}
+    to{opacity:1;transform:translate3d(0,0,0)}
+  }
+  .subject-picker-close,.subject-picker-reload{
+    transition:transform 145ms ease,background-color 145ms ease!important;
+  }
+  .subject-picker-close:active,.subject-picker-reload:active{transform:scale(.975)}
+}
+@media(prefers-reduced-motion:reduce){
+  .subject-picker-layer,.subject-picker-panel,.subject-picker-item,
+  .subject-picker-reload,.subject-picker-close{animation:none!important;transition:none!important}
+}

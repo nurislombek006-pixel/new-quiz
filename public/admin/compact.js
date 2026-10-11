@@ -4,6 +4,8 @@
 let visitedUsers=[];
 let usersVisibleCount=60;
 let usersRequest=null;
+// Remember expanded cards when Premium/ban actions refresh the user list.
+const expandedPeopleIds=new Set();
 
 function activityTime(d){
   const n=Date.parse(d||'');
@@ -88,26 +90,45 @@ function renderUsers(){
       const status=u.banned?
         '<span class="status-banned">🚫 Бан</span>':
         u.premium?'<span class="status-premium">💎 Premium</span>':'Обычный';
+      const id=escapeHtml(String(u.id||''));
       const recent=recentlyInApp(u)?
         '<span class="status-recent">● Недавно в QuizBot</span>':
         'Был в QuizBot: '+escapeHtml(activityAge(u.last_seen));
-      return '<div class="person"><div class="person-head"><div><div class="person-name">'+name+
-        '</div><div class="person-handle">'+handle+'</div></div><span class="person-status">'+status+'</span></div>'+
-        '<div class="person-id">Telegram ID: '+escapeHtml(u.id)+'</div>'+
-        '<div class="person-time">'+recent+'<div>Последний вход: '+escapeHtml(activityTime(u.last_opened||u.first_seen))+'</div><div>Последняя активность: '+escapeHtml(activityTime(u.last_seen))+'</div></div>'+
+      // The summary is keyboard- and touch-accessible, the quick actions stay visible.
+      return '<article class="person">'+
+        '<details class="person-details" data-person-id="'+id+'"'+(expandedPeopleIds.has(String(u.id))?' open':'')+'>'+
+        '<summary class="person-summary" aria-label="Информация о пользователе '+id+'">'+
+          '<span class="person-summary-main"><span class="person-name">'+name+'</span>'+
+          '<span class="person-handle">'+handle+'</span>'+
+          '<span class="person-id">Telegram ID: '+id+'</span></span>'+
+          '<span class="person-summary-side"><span class="person-status">'+status+'</span>'+
+          '<span class="person-expand-icon" aria-hidden="true">⌄</span></span>'+
+        '</summary>'+
+        '<div class="person-extra"><div class="person-time">'+recent+
+          '<div>Последний вход: '+escapeHtml(activityTime(u.last_opened||u.first_seen))+'</div>'+
+          '<div>Последняя активность: '+escapeHtml(activityTime(u.last_seen))+'</div></div>'+
+          '<div class="person-foot"><span class="person-status">Открытий: '+Math.max(0,Number(u.opens)||0)+'</span>'+
+          '<button type="button" class="btn compact" data-manage-user="'+id+'">Ещё ↗</button></div>'+
+        '</div></details>'+
         '<div class="person-controls">'+
-        '<button type="button" class="btn btn-user-premium" data-user-action="'+(u.premium?'remove':'premium')+'" data-user-id="'+escapeHtml(u.id)+'">'+(u.premium?'Снять 💎':'💎 +30 дней')+'</button>'+
-        '<button type="button" class="btn '+(u.banned?'btn-user-unban':'btn-user-ban')+'" data-user-action="'+(u.banned?'unban':'ban')+'" data-user-id="'+escapeHtml(u.id)+'">'+(u.banned?'Разбанить':'🚫 Бан')+'</button></div>'+
-        '<div class="person-foot"><span class="person-status">Открытий: '+Math.max(0,Number(u.opens)||0)+'</span>'+
-        '<button type="button" class="btn compact" data-manage-user="'+escapeHtml(u.id)+'">Ещё ↗</button></div></div>';
+        '<button type="button" class="btn btn-user-premium" data-user-action="'+(u.premium?'remove':'premium')+'" data-user-id="'+id+'">'+(u.premium?'Снять 💎':'💎 +30 дней')+'</button>'+
+        '<button type="button" class="btn '+(u.banned?'btn-user-unban':'btn-user-ban')+'" data-user-action="'+(u.banned?'unban':'ban')+'" data-user-id="'+id+'">'+(u.banned?'Разбанить':'🚫 Бан')+'</button></div></article>';
     }).join('');
   }
+  root.querySelectorAll('.person-details').forEach(details=>{
+    details.addEventListener('toggle',()=>{
+      const id=String(details.dataset.personId||'');
+      if(!id)return;
+      if(details.open)expandedPeopleIds.add(id);
+      else expandedPeopleIds.delete(id);
+    });
+  });
   root.querySelectorAll('[data-manage-user]').forEach(button=>{
     button.addEventListener('click',()=>manageUser(button.dataset.manageUser));
   });
   more.classList.toggle('hidden',filtered.length<=usersVisibleCount);
   note.textContent='Показано '+Math.min(filtered.length,usersVisibleCount)+' из '+filtered.length+
-    '. Время — по часовому поясу устройства. «Недавно» означает отметку за 2 минуты, а не Telegram онлайн.';
+    ' · Активность только внутри QuizBot.';
 }
 function showMoreUsers(){
   usersVisibleCount+=60;

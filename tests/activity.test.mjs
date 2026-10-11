@@ -120,7 +120,7 @@ test('Compact panel keeps exactly four sections and original critical functions'
   assert.match(page,/id="userFilter"/);
   assert.match(page,/id="subjectFold"/);
   assert.match(page,/id="usersMore"/);
-  assert.match(page,/compact\.js\?v=1/);
+  assert.match(page,/compact\.js\?v=2/);
   assert.match(page,/compact\.css\?v=1/);
   assert.match(home,/activity-tracker\.js\?v=1/);
   assert.match(css,/people-list/);

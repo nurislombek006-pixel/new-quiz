@@ -1,0 +1,66 @@
+/* QuizBot — fast and lightweight animations, tuned for mobile Telegram.
+   Only opacity and transform are animated for entrance, never large lists or blur. */
+@media (prefers-reduced-motion: no-preference) {
+  #start-screen:not(.hidden), #list-screen:not(.hidden),
+  #result-screen:not(.hidden), #admin-screen:not(.hidden) {
+    animation: qb-screen-in 220ms cubic-bezier(.2,.82,.25,1) both!important;
+  }
+  @keyframes qb-screen-in {
+    from {opacity:.72;transform:translate3d(0,7px,0)}
+    to {opacity:1;transform:translate3d(0,0,0)}
+  }
+  .topbar .subject-picker-trigger, .menu-toggle, .icon-btn,
+  .menu-main-btn, .btn, .drawer-item, .mode-tab, .seg button,
+  .option, .question-actions button, .topbar button {
+    transition: transform 145ms cubic-bezier(.2,.82,.25,1),
+                background-color 150ms ease, border-color 150ms ease,
+                box-shadow 150ms ease, opacity 150ms ease!important;
+  }
+  .topbar .subject-picker-trigger:active,
+  .menu-toggle:active, .icon-btn:active, .menu-main-btn:active,
+  .btn:active:not(:disabled), .drawer-item:active:not(:disabled),
+  .mode-tab:active, .seg button:active, .option:active:not(:disabled) {
+    transform:scale(.975)!important;
+  }
+  .option.selected {transition:transform 145ms ease,background-color 165ms ease,border-color 165ms ease,box-shadow 165ms ease!important}
+  #start-screen input,#start-screen select,#start-screen textarea {
+    transition:background-color 150ms ease,border-color 150ms ease,box-shadow 150ms ease!important;
+  }
+  #list-screen .item:nth-child(-n+8) {
+    animation: qb-item-in 180ms ease-out both!important;
+  }
+  @keyframes qb-item-in {
+    from {opacity:.65;transform:translate3d(0,5px,0)}
+    to {opacity:1;transform:translate3d(0,0,0)}
+  }
+  #start-screen.qb-subject-updated .title,
+  #start-screen.qb-subject-updated .menu-main-btn {
+    animation: qb-subject-content-in 235ms cubic-bezier(.2,.82,.25,1) both;
+  }
+  @keyframes qb-subject-content-in {
+    from {opacity:.7;transform:translate3d(0,5px,0)}
+    to {opacity:1;transform:translate3d(0,0,0)}
+  }
+  .topbar .subject-picker-trigger.is-switching{
+    animation:qb-switch-highlight 240ms cubic-bezier(.2,.82,.25,1) both!important;
+  }
+  @keyframes qb-switch-highlight {
+    0%{transform:scale(.965);opacity:.75}
+    70%{transform:scale(1.025);opacity:1}
+    100%{transform:scale(1);opacity:1}
+  }
+  .side-drawer{transition:transform 205ms cubic-bezier(.2,.82,.25,1)!important}
+  .drawer-overlay{transition:opacity 205ms ease!important}
+  @media(hover:hover) and (pointer:fine) {
+    .menu-main-btn:hover:not(:disabled),.btn:hover:not(:disabled) {
+      transform:translate3d(0,-1px,0);
+    }
+  }
+}
+/* Respect reduced-motion preferences for motion sensitivity and battery use. */
+@media (prefers-reduced-motion: reduce) {
+  .screen,.side-drawer,.drawer-overlay,.btn,.option,
+  .subject-picker-trigger,.menu-main-btn,.menu-toggle,.icon-btn {
+    animation:none!important;transition:none!important;
+  }
+}
