@@ -137,6 +137,33 @@ function parseQuizDocument(text){
   return {questions,errors};
 }
 
+function syncDocumentImportSubjects(){
+  const original=document.getElementById('quickSubject');
+  const dest=document.getElementById('docImportSubject');
+  if(!dest||!original)return;
+  const existing=dest.value;
+  const options=Array.from(original.options||[]).filter(o=>o.value);
+  if(!options.length){
+    dest.disabled=true;
+    dest.replaceChildren(new Option('Сначала добавь предмет',''));
+    return;
+  }
+  dest.replaceChildren(...options.map(o=>new Option(o.textContent,o.value)));
+  dest.value=options.some(o=>o.value===existing)?existing:(original.value||options[0].value);
+  dest.disabled=false;
+}
+function initDocumentImport(){
+  const original=document.getElementById('quickSubject');
+  if(original&&typeof MutationObserver==='function'){
+    new MutationObserver(syncDocumentImportSubjects).observe(original,{childList:true,subtree:true});
+  }
+  window.addEventListener('focus',syncDocumentImportSubjects);
+  syncDocumentImportSubjects();
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',initDocumentImport,{once:true});
+}else initDocumentImport();
+
 function docImportSetStatus(text,kind='info'){
   const el=document.getElementById('docImportStatus');
   if(el){el.textContent=text;el.dataset.status=kind}
@@ -210,10 +237,11 @@ async function previewQuizDocumentFile(){
 }
 async function importDocumentQuestions(){
   if(docImportSaving||docImportProblems.length||!docImportParsed.length)return;
-  const subject=document.getElementById('quickSubject');
   if(typeof quickSubjectSync==='function')quickSubjectSync();
+  syncDocumentImportSubjects();
+  const subject=document.getElementById('docImportSubject');
   const key=subject?.value;
-  if(!key){docImportSetStatus('Сначала выбери предмет в форме выше.','error');return}
+  if(!key){docImportSetStatus('Сначала выбери предмет.','error');return}
   const count=docImportParsed.length;
   if(!confirm('Добавить '+count+' вопросов в выбранный предмет?\nУже существующие вопросы будут сохранены, повторы пропущены.'))return;
   docImportSaving=true;
