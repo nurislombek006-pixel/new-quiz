@@ -151,7 +151,7 @@
     window.showScreen('admin-screen');
     hideSubjectOnAdmin();
     const iframe=document.getElementById('owner-admin-frame');
-    if(iframe&&!iframe.getAttribute('src'))iframe.src='/admin/index.html?embedded=1&v=5';
+    if(iframe&&!iframe.getAttribute('src'))iframe.src='/admin/index.html?embedded=1&v=6';
   }
 
   function insertMenu(){
