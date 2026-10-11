@@ -623,6 +623,29 @@ async function handleAdmin(request, env, path){
       return adminJson(request,{ok:false,error:'Не удалось загрузить список активности QuizBot.'},500);
     }
   }
+  if(path === '/api/admin/users/import' && request.method === 'POST'){
+    // Authenticated owner-only restoration of verified records exported from the old site.
+    const values=Array.isArray(body?.users)?body.users:[];
+    if(values.length>15000)return adminJson(request,{ok:false,error:'Слишком много пользователей для одного импорта'},413);
+    let saved=0;
+    const store=d1Store(env.DB,QUIZBOT_ACTIVITY_STORE_NAME);
+    for(const user of values){
+      const identity=activityIdentity(user);
+      if(!identity)continue;
+      const first=Date.parse(user.first_seen||'');
+      const last=Date.parse(user.last_seen||'');
+      if(!Number.isFinite(first)||!Number.isFinite(last)||last<first)continue;
+      const record={
+        ...identity,first_seen:new Date(first).toISOString(),
+        last_opened:new Date(Number.isFinite(Date.parse(user.last_opened||''))?Date.parse(user.last_opened):first).toISOString(),
+        last_seen:new Date(last).toISOString(),
+        opens:Math.max(0,Math.min(1000000,Math.floor(Number(user.opens)||0)))
+      };
+      await store.set(QUIZBOT_ACTIVITY_PREFIX+identity.id,JSON.stringify(record));
+      saved++;
+    }
+    return adminJson(request,{ok:true,imported:saved});
+  }
   if(path === '/api/admin/debug-auth' && request.method === 'POST'){
     return adminJson(request,{
       ok:true,
