@@ -1,0 +1,4 @@
+/* Lightweight typography in the owner-only QuizBot admin iframe. */
+body, body * {font-weight:400!important;}
+body :is(h1,h2,h3,h4,strong,b,.person-name,.section-intro h2,.quick-header h2) {font-weight:500!important;}
+body :is(button,.tab,.btn,.person-status,.fold>summary) {font-weight:450!important;}
