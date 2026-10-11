@@ -115,7 +115,7 @@ test('Owner authorization explains invalid Netlify token without exposing token 
   const signed=await sign(newFields(5305261101));
   const result=await funcs.adminOwnerOk(request(signed),{APP_BOT_TOKEN:'not_valid_for_current_bot'});
   assert.equal(result.ok,false);
-  assert.equal(result.code,'TELEGRAM_SIGNATURE_INVALID');
+  assert.equal(result.code,'TELEGRAM_PUBLIC_SIGNATURE_MISSING');
   assert.ok(!JSON.stringify(result).includes('not_valid_for_current_bot'));
 });
 
