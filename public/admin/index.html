@@ -21,6 +21,7 @@ body.admin-embedded .card{margin:9px 0}
 </style>
 <link rel="stylesheet" href="./compact.css?v=1">
 <link rel="stylesheet" href="./quick-actions.css?v=1">
+<link rel="stylesheet" href="./document-import.css?v=1">
 <link rel="stylesheet" href="./soft-type.css?v=2">
 </head>
 <body>
@@ -135,6 +136,33 @@ body.admin-embedded .card{margin:9px 0}
   </div>
 
   <div id="questions" class="pane">
+    <div class="card doc-import-card">
+      <div class="quick-header">
+        <h2>📄 Загрузить вопросы из Word</h2>
+        <p class="mini">Выбери предмет в форме ниже, загрузи DOCX или TXT. Правильный ответ отметь знаком #.</p>
+      </div>
+      <div class="doc-import-example">
+        <div class="doc-import-example-heading">Пример документа</div>
+        <pre>1. Какая столица Узбекистана?
+A) Москва
+B) #Ташкент
+C) Бишкек
+D) Пекин
+
+2. Сколько будет 2 + 2?
+A) 3
+#B) 4
+C) 5
+D) 6</pre>
+        <button type="button" class="btn compact" onclick="downloadQuizDocumentExample()">↓ Скачать образец TXT</button>
+      </div>
+      <label for="docImportFile">Файл с вопросами (.docx, .txt)</label>
+      <input id="docImportFile" type="file" accept=".docx,.txt,.md,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onchange="previewQuizDocumentFile()">
+      <div id="docImportStatus" class="mini doc-import-status" role="status" aria-live="polite">Сначала выбери файл. До подтверждения ничего не сохраняется.</div>
+      <div id="docImportPreview" class="doc-import-preview"></div>
+      <button type="button" id="docImportSave" class="btn green full" onclick="importDocumentQuestions()" disabled>✓ Добавить вопросы в предмет</button>
+      <p class="mini doc-import-note">Старые вопросы не удаляются. Повторные вопросы пропускаются. Максимум 1000 вопросов за один документ, размер до 5 МБ.</p>
+    </div>
     <div class="card quick-question-card">
       <div class="quick-header">
         <h2>➕ Добавить вопрос</h2>
@@ -297,5 +325,7 @@ async function initializeEmbeddedAdmin(){
 initializeEmbeddedAdmin();
 </script>
 <script src="./quick-actions.js?v=1"></script>
+<script src="./vendor/jszip.min.js?v=1"></script>
+<script src="./document-import.js?v=1"></script>
 </body>
 </html>
