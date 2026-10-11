@@ -121,7 +121,7 @@ test('Interface offers visible quick actions and both Premium and Free badges st
   assert.match(admin,/quick-actions\.js\?v=1/);
   assert.match(admin,/quick-actions\.css\?v=1/);
   assert.match(compact,/data-user-action/);
-  assert.match(home,/admin-embed\.js\?v=7/);
+  assert.match(home,/admin-embed\.js\?v=8/);
   assert.match(home,/el\.textContent=isPremium\?'PRO':'Free'/);
   assert.match(eco,/el\.textContent=p\?'PRO':'Free'/);
   assert.match(css,/quick-actions/);
