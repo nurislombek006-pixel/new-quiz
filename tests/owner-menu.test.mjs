@@ -80,7 +80,7 @@ test('Owner sees admin button only AFTER signed server permission',async()=>{
   assert.match(button.children[1].textContent,/Панель администратора/);
   button.listeners.click();
   assert.equal(instance.window.lastScreen,'admin-screen');
-  assert.equal(instance.document.getElementById('owner-admin-frame').src,'/admin/index.html?embedded=1&v=4');
+  assert.equal(instance.document.getElementById('owner-admin-frame').src,'/admin/index.html?embedded=1&v=5');
   assert.equal(instance.document.body.classList.contains('owner-admin-active'),true);
 });
 
