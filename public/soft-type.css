@@ -1,7 +1,39 @@
 /* QuizBot typography + compact study panel. Presentation-only. */
-body, body * {font-weight:400!important;}
-body :is(h1,h2,h3,h4,h5,h6,strong,b,.title,.item-q,.question,.welcome-subject,.drawer-title,.drawer-section-title,.person-name,.stat b) {font-weight:500!important;}
-body :is(.premium-badge,.badge-generated,.btn-primary,.mode-tab.active) {font-weight:500!important;}
+/* Balanced medium weight: regular text readable, headings noticeable but not heavy. */
+body, body * {font-weight:500!important;}
+body :is(h1,h2,h3,h4,h5,h6,strong,b,.title,.item-q,.question,.drawer-title,.drawer-section-title,.person-name,.stat b) {font-weight:600!important;}
+body :is(button,.btn,input,select,textarea,label,.mode-tab,.seg button,.quick button,.premium-badge,.badge-generated,.btn-primary,.mode-tab.active) {font-weight:500!important;}
+/* Center the subject selector relative to the FULL topbar, regardless of
+   menu width on the left or PRO + theme controls on the right. */
+.topbar {position:relative!important;display:flex!important;align-items:center!important;justify-content:space-between!important;min-height:43px!important;}
+.topbar .menu-toggle,.topbar .top-right {position:relative;z-index:2;flex-shrink:0;}
+.topbar .subject-switch-wrap {
+ position:absolute!important;
+ left:50%!important;
+ top:50%!important;
+ transform:translate(-50%,-50%)!important;
+ width:min(188px,calc(100% - 228px))!important;
+ min-width:0!important;
+ max-width:188px!important;
+ flex:none!important;
+ z-index:1!important;
+}
+.topbar .subject-select {
+ display:block!important;
+ width:100%!important;
+ height:39px!important;
+ padding:0 27px 0 11px!important;
+ font-size:12.5px!important;
+ font-weight:500!important;
+ text-overflow:ellipsis!important;
+ white-space:nowrap!important;
+ overflow:hidden!important;
+ box-shadow:none!important;
+}
+.topbar .subject-switch-wrap:after {right:10px!important;font-size:16px!important;}
+.topbar .top-right {gap:6px!important;}
+#start-screen .title {font-weight:600!important;margin-bottom:5px!important;line-height:1.16!important;}
+#start-screen .center {margin-bottom:11px!important;}
 
 #list-screen .sticky-list-head {padding:8px 10px!important;margin:0 0 8px!important;border-radius:16px!important;box-shadow:0 5px 15px rgba(15,23,42,.10)!important;}
 #list-screen .list-title-row {display:flex!important;align-items:center!important;grid-template-columns:none!important;gap:8px!important;margin:0 0 6px!important;padding:0!important;}
@@ -18,7 +50,7 @@ body :is(.premium-badge,.badge-generated,.btn-primary,.mode-tab.active) {font-we
  body {padding:10px 8px 18px!important;}
  .topbar {gap:7px!important;margin-bottom:7px!important;}
  .topbar .menu-toggle {height:43px!important;width:43px!important;font-size:24px!important;}
- .topbar .subject-select {height:43px!important;font-size:13px!important;}
+ .topbar .subject-select {height:39px!important;font-size:12.5px!important;}
  .topbar .icon-btn {min-width:43px!important;min-height:43px!important;}
  #list-screen .sticky-list-head {top:calc(4px + env(safe-area-inset-top,0px))!important;padding:8px 9px!important;border-radius:15px!important;}
  #list-screen .list-title-row #list-title {font-size:14px!important;}
