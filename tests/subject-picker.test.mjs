@@ -77,8 +77,8 @@ test('Refreshing list shares one in-flight request instead of issuing duplicate 
 test('Original native select and mobile-friendly picker remain accessible',()=>{
   assert.match(page,/id="subject-select" class="subject-select" onchange="switchSubject\(this\.value\)"/);
   assert.match(page,/id="subject-picker-trigger"/);
-  assert.match(page,/subject-picker\.css\?v=1/);
-  assert.match(page,/subject-picker\.js\?v=1/);
+  assert.match(page,/subject-picker\.css\?v=2/);
+  assert.match(page,/subject-picker\.js\?v=2/);
   assert.match(css,/#subject-select\{pointer-events:none!important;opacity:0!important\}/);
   assert.match(css,/body\.subject-picker-ready \.topbar \.subject-picker-trigger/);
   assert.match(css,/.subject-picker-item/);
@@ -93,4 +93,18 @@ test('After closing owner admin the menu refreshes subjects without modifying st
   assert.doesNotMatch(script,/fetch\([^)]*,\s*\{\s*method:\s*['"]POST/);
   assert.match(assets,/\"\/admin\/index\.html\":/);
   assert.match(assets,/id=\\\"migrate-old-site\\\"/);
+});
+
+test('Animated picker closes smoothly and offers reduced-motion fallback',()=>{
+  const motion=readFileSync('public/motion.css','utf8');
+  assert.match(css,/@keyframes qb-picker-panel-in/);
+  assert.match(css,/\.subject-picker-layer\.is-closing/);
+  assert.match(css,/prefers-reduced-motion:reduce/);
+  assert.match(script,/closingLayer\.classList\.add\('is-closing'\)/);
+  assert.match(script,/setTimeout\(finish,160\)/);
+  assert.match(script,/if\(reduce\)return finish\(\)/);
+  assert.match(script,/animateSubjectSwitch\(\)/);
+  assert.match(motion,/qb-screen-in/);
+  assert.match(motion,/prefers-reduced-motion: reduce/);
+  assert.match(page,/motion\.css\?v=1/);
 });
