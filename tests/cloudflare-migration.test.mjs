@@ -80,3 +80,24 @@ test('Full original UI is in Cloudflare and admin owner can migrate old Netlify 
  assert.equal(config.d1_databases[0].binding,'DB');
  assert.equal(config.d1_databases[0].database_name,'quizbot-astor-data');
 });
+
+test('Compact study header and normal-weight typography preserve UI actions',()=>{
+  const css=readFileSync('public/soft-type.css','utf8');
+  const adminCss=readFileSync('public/admin/soft-type.css','utf8');
+  const index=readFileSync('public/index.html','utf8');
+  const assetMap=JSON.parse(assets.slice(assets.indexOf('export const ASSETS = ')+'export const ASSETS = '.length).replace(/;\s*$/,''));
+  assert.match(css,/#list-screen \.sticky-list-head/);
+  assert.match(css,/#list-screen #search-box/);
+  assert.match(css,/#list-screen #study-options-row/);
+  assert.match(css,/font-weight:400!important/);
+  assert.match(index,/soft-type\.css\?v=1/);
+  assert.match(index,/id="study-show-options"/);
+  assert.match(index,/id="search-box"/);
+  assert.match(index,/id="list-title"/);
+  assert.match(index,/onclick="backToMenu\(\)"/);
+  assert.match(assetMap['/index.html'],/soft-type\.css\?v=1/);
+  assert.match(assetMap['/admin/index.html'],/soft-type\.css\?v=1/);
+  assert.match(assetMap['/admin/index.html'],/id="migrate-old-site"/);
+  assert.equal(assetMap['/soft-type.css'],css);
+  assert.equal(assetMap['/admin/soft-type.css'],adminCss);
+});
