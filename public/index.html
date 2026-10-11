@@ -318,6 +318,7 @@
   <link rel="stylesheet" href="./eco-upgrade.css?v=3"/>
   <link rel="stylesheet" href="./eco-final-patch.css?v=14"/>
 <link rel="stylesheet" href="./drawer-clarity.css?v=1"/>
+<link rel="stylesheet" href="./drawer-v2.css?v=1"/>
 </head>
 <body>
 <script>
@@ -543,20 +544,49 @@ setTimeout(function(){
 <!-- Drawer backdrop -->
 <div id="drawer-backdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
 
-<!-- Side drawer -->
-<aside id="side-drawer" class="side-drawer">
-  <div class="drawer-head">
-    <div><div class="drawer-title">Меню</div><div class="drawer-sub">Дополнительные разделы</div></div>
-    <button class="drawer-close" onclick="closeDrawer()">×</button>
+<!-- Compact QuizBot sidebar — actions are preserved; admin entry is appended only after signed verification. -->
+<aside id="side-drawer" class="side-drawer qb-drawer-v2" aria-label="Меню QuizBot">
+  <div class="drawer-head qb-drawer-head">
+    <div class="qb-drawer-identity">
+      <span class="qb-drawer-mark" aria-hidden="true">✦</span>
+      <div class="qb-drawer-heading">
+        <div class="drawer-title qb-drawer-title">Меню QuizBot</div>
+        <div class="drawer-sub qb-drawer-sub">Все разделы под рукой</div>
+      </div>
+    </div>
+    <button type="button" class="drawer-close qb-drawer-close" aria-label="Закрыть меню" onclick="closeDrawer()">×</button>
   </div>
-  <div class="drawer-list">
-    <button class="drawer-item" onclick="closeDrawer();guardedAction(initStudy)">📖 Изучить тесты</button>
-    <button class="drawer-item" onclick="closeDrawer();guardedAction(showFavorites)">⭐ Избранные вопросы</button>
-    <button class="drawer-item" onclick="closeDrawer();guardedAction(showHistory)">🕘 История результатов</button>
-    <button class="drawer-item" onclick="closeDrawer();guardedAction(()=>showMistakeList())">❗ Изучить ошибки</button>
-    <button class="drawer-item" onclick="closeDrawer();ecoQuickStart('mistakes')">🎯 Быстрый тест по ошибкам</button>
-    <button class="drawer-item" onclick="closeDrawer();ecoResetFilters()">🧹 Сбросить настройки</button>
-    <button class="drawer-item" onclick="closeDrawer();openActivationPanel()">🔑 Активация подписки</button>
+  <div class="drawer-list qb-drawer-list" data-grouped="1">
+    <section class="qb-drawer-section" aria-label="Обучение">
+      <div class="qb-drawer-section-title">ОБУЧЕНИЕ</div>
+      <button type="button" class="drawer-item qb-drawer-item qb-drawer-feature" onclick="closeDrawer();guardedAction(initStudy)">
+        <span class="qb-drawer-icon qb-ico-book" aria-hidden="true">📖</span><span class="qb-drawer-item-name">Изучить тесты</span><span class="qb-drawer-arrow" aria-hidden="true">›</span>
+      </button>
+      <button type="button" class="drawer-item qb-drawer-item" onclick="closeDrawer();guardedAction(showFavorites)">
+        <span class="qb-drawer-icon qb-ico-star" aria-hidden="true">⭐</span><span class="qb-drawer-item-name">Избранные вопросы</span><span class="qb-drawer-arrow" aria-hidden="true">›</span>
+      </button>
+    </section>
+    <section class="qb-drawer-section" id="upgrade-drawer-extra" aria-label="Практика и результаты">
+      <div class="qb-drawer-section-title">ПРАКТИКА И РЕЗУЛЬТАТЫ</div>
+      <button type="button" class="drawer-item qb-drawer-item" onclick="closeDrawer();guardedAction(showHistory)">
+        <span class="qb-drawer-icon qb-ico-history" aria-hidden="true">🕘</span><span class="qb-drawer-item-name">История результатов</span><span class="qb-drawer-arrow" aria-hidden="true">›</span>
+      </button>
+      <button type="button" class="drawer-item qb-drawer-item" onclick="closeDrawer();guardedAction(()=>showMistakeList())">
+        <span class="qb-drawer-icon qb-ico-errors" aria-hidden="true">❗</span><span class="qb-drawer-item-name">Изучить ошибки</span><span class="qb-drawer-arrow" aria-hidden="true">›</span>
+      </button>
+      <button type="button" class="drawer-item qb-drawer-item" onclick="closeDrawer();ecoQuickStart('mistakes')">
+        <span class="qb-drawer-icon qb-ico-target" aria-hidden="true">🎯</span><span class="qb-drawer-item-name">Быстрый тест по ошибкам</span><span class="qb-drawer-arrow" aria-hidden="true">›</span>
+      </button>
+    </section>
+    <section class="qb-drawer-section" aria-label="Настройки и доступ">
+      <div class="qb-drawer-section-title">НАСТРОЙКИ И ДОСТУП</div>
+      <button type="button" class="drawer-item qb-drawer-item" onclick="closeDrawer();ecoResetFilters()">
+        <span class="qb-drawer-icon qb-ico-reset" aria-hidden="true">🧹</span><span class="qb-drawer-item-name">Сбросить настройки</span><span class="qb-drawer-arrow" aria-hidden="true">›</span>
+      </button>
+      <button type="button" class="drawer-item qb-drawer-item qb-drawer-premium" onclick="closeDrawer();openActivationPanel()">
+        <span class="qb-drawer-icon qb-ico-key" aria-hidden="true">🔑</span><span class="qb-drawer-item-name">Активация подписки</span><span class="qb-drawer-arrow" aria-hidden="true">›</span>
+      </button>
+    </section>
   </div>
 </aside>
 
