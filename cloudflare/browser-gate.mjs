@@ -1,4 +1,4 @@
-import { validateMiniAppGateInitData, reportBrowserGateEvent } from './backend.mjs';
+import { validateMiniAppGateInitData, reportBrowserGateEvent, quizbotIsBlockedUser } from './backend.mjs';
 
 const COOKIE='__Host-tsuequiz-auth';
 const TTL=8*3600;
@@ -11,15 +11,28 @@ async function hmac(secret,text){
 }
 function same(a,b){a=String(a||'');b=String(b||'');let v=a.length^b.length;for(let i=0;i<Math.max(a.length,b.length);i++)v|=(a.charCodeAt(i)||0)^(b.charCodeAt(i)||0);return v===0}
 const sourceIP=req=>String(req.headers.get('CF-Connecting-IP')||'неизвестен').slice(0,70);
-async function cookie(env,type){const end=Math.floor(Date.now()/1000)+TTL,body=type+'.'+end;return body+'.'+await hmac(env.GATE_SESSION_SECRET,body)}
+async function cookie(env,type,id=''){
+ const end=Math.floor(Date.now()/1000)+TTL;
+ const subject=type==='telegram'?String(id||''):'';
+ if(type==='telegram'&&!/^[1-9][0-9]{0,18}$/.test(subject))throw Error('MISSING_VERIFIED_TELEGRAM_ID');
+ const body=type==='telegram'?'telegram.'+subject+'.'+end:'owner.'+end;
+ return body+'.'+await hmac(env.GATE_SESSION_SECRET,body);
+}
 function cookieHeader(value){return COOKIE+'='+value+'; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age='+TTL}
 async function authorized(req,env){
  const raw=req.headers.get('Cookie')||'';
  const value=raw.split(';').map(s=>s.trim()).find(s=>s.startsWith(COOKIE+'='))?.slice(COOKIE.length+1)||'';
- const m=value.match(/^(owner|telegram)\.(\d{10})\.([a-f0-9]{64})$/);
- if(!m||Number(m[2])<Math.floor(Date.now()/1000))return false;
- return same(m[3],await hmac(env.GATE_SESSION_SECRET,m[1]+'.'+m[2]));
+ const owner=value.match(/^owner\.(\d{10})\.([a-f0-9]{64})$/);
+ const telegram=value.match(/^telegram\.([1-9][0-9]{0,18})\.(\d{10})\.([a-f0-9]{64})$/);
+ const m=telegram||owner;
+ if(!m)return null;
+ const type=telegram?'telegram':'owner',id=telegram?m[1]:null,expiry=Number(telegram?m[2]:m[1]),signature=telegram?m[3]:m[2];
+ if(expiry<Math.floor(Date.now()/1000))return null;
+ const body=type==='telegram'?'telegram.'+id+'.'+expiry:'owner.'+expiry;
+ if(!same(signature,await hmac(env.GATE_SESSION_SECRET,body)))return null;
+ return {type,id};
 }
+
 function validPost(req){
  const origin=req.headers.get('Origin');
  return (!origin||origin===new URL(req.url).origin)&&req.headers.get('Sec-Fetch-Site')!=='cross-site'&&(req.headers.get('Content-Type')||'').toLowerCase().startsWith('application/json');
@@ -51,8 +64,10 @@ export async function gate(req,env,ctx){
  if(route==='/__gate/telegram'&&method==='POST'){
   if(!validPost(req))return response({ok:false,error:'INVALID_ORIGIN'},403);
   const b=await req.json().catch(()=>null);
-  if(!b||typeof b.initData!=='string'||b.initData.length>8192||!(await validateMiniAppGateInitData(b.initData,env)))return response({ok:false,error:'INVALID_TELEGRAM'},401);
-  return response({ok:true},200,{'Set-Cookie':cookieHeader(await cookie(env,'telegram'))});
+  if(!b||typeof b.initData!=='string'||b.initData.length>8192)return response({ok:false,error:'INVALID_TELEGRAM'},401);
+  const signedUser=await validateMiniAppGateInitData(b.initData,env);
+  if(!signedUser?.id)return response({ok:false,error:'INVALID_TELEGRAM'},401);
+  return response({ok:true},200,{'Set-Cookie':cookieHeader(await cookie(env,'telegram',signedUser.id))});
  }
  if(route==='/__gate/login'&&method==='POST'){
   if(!validPost(req))return response({ok:false,error:'INVALID_ORIGIN'},403);
@@ -75,7 +90,18 @@ export async function gate(req,env,ctx){
   return response({ok:true},200,{'Set-Cookie':COOKIE+'=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0'});
  }
  if(route.startsWith('/__gate/'))return response({ok:false,error:'NOT_FOUND'},404);
- if(await authorized(req,env))return null;
+ const session=await authorized(req,env);
+ if(session){
+  // Admin password sign-in is independent. Telegram visitors are checked against
+  // the real access list before any API data (including questions) is returned.
+  // /api/access remains reachable so the client can show its ban screen.
+  if(session.type==='telegram'&&route.startsWith('/api/')&&route!=='/api/access'){
+   if(await quizbotIsBlockedUser(env,session.id)){
+    return response({ok:false,error:'ACCOUNT_BLOCKED',message:'Вы были заблокированы администрацией'},403);
+   }
+  }
+  return null;
+ }
  if((method==='GET'||method==='HEAD')&&['/','/index.html','/admin','/admin/index.html'].includes(route))return loginPage();
  if(route.startsWith('/api/'))return response({ok:false,error:'AUTH_REQUIRED'},401);
  return new Response('Требуется вход через Telegram или авторизация администратора.',{status:403,headers:{'Cache-Control':'no-store','Content-Type':'text/plain; charset=utf-8'}});
