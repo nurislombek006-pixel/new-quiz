@@ -1,0 +1,101 @@
+/* QuizBot ocean atmosphere. Decorative depth stays out of the question flow. */
+body#qb-interface{
+ --qb-design-accent:#0b7189;
+ --qb-accent-text:#95e3e9;
+ --qb-accent-soft:#173c4b;
+ --qb-design-bg:#071a27;
+ --qb-design-card:#102b3a;
+ --qb-design-subtle:#183746;
+ --qb-design-text:#eaf8f8;
+ --qb-design-muted:#a9c8d0;
+ --qb-design-line:#345866;
+ --qb-control-border:#6d93a1;
+ --qb-design-shadow:0 16px 42px #00121d54;
+ background:
+  radial-gradient(ellipse 74% 38% at 86% -4%,#1b779449,transparent 75%),
+  radial-gradient(ellipse 58% 30% at -10% 78%,#175f8550,transparent 78%),
+  linear-gradient(165deg,#071a27 0%,#0b2837 55%,#081e2d 100%)!important;
+}
+body#qb-interface.light{
+ --qb-design-bg:#eef8f8;
+ --qb-design-card:#ffffff;
+ --qb-design-subtle:#f2f9fa;
+ --qb-design-text:#173544;
+ --qb-design-muted:#4d6a77;
+ --qb-design-line:#d4e7e9;
+ --qb-control-border:#7896a0;
+ --qb-accent-text:#0b7189;
+ --qb-accent-soft:#e7f4f6;
+ --qb-design-shadow:0 14px 34px #14536b16;
+ background:
+  radial-gradient(ellipse 75% 36% at 90% -5%,#bcebef,transparent 75%),
+  radial-gradient(ellipse 62% 31% at -15% 80%,#d9eef8,transparent 80%),
+  linear-gradient(165deg,#eff9f9,#eaf4f8 75%,#eef8f8)!important;
+}
+body#qb-interface .topbar :is(.menu-toggle,.icon-btn),
+body#qb-interface .topbar .subject-select,
+body#qb-interface.subject-picker-ready .topbar .subject-picker-trigger,
+body#qb-interface:not(.light).subject-picker-ready .topbar .subject-picker-trigger{
+ background:color-mix(in srgb,var(--qb-design-accent) 9%,var(--card))!important;
+ border-color:color-mix(in srgb,var(--qb-design-accent) 22%,var(--line))!important;
+ box-shadow:inset 0 1px #ffffff12,0 6px 19px #00121d20!important;
+}
+body#qb-interface.light .topbar :is(.menu-toggle,.icon-btn),
+body#qb-interface.light .topbar .subject-select,
+body#qb-interface.light.subject-picker-ready .topbar .subject-picker-trigger{
+ box-shadow:inset 0 1px #ffffffa8,0 6px 18px #14536b0d!important;
+}
+body#qb-interface #start-screen.screen.card{
+ position:relative;
+ background:
+  radial-gradient(ellipse 70% 32% at 100% 0%,color-mix(in srgb,var(--qb-design-accent) 19%,transparent),transparent 82%),
+  radial-gradient(ellipse 62% 26% at -12% 100%,#367caa1e,transparent 80%),
+  var(--card)!important;
+ border-color:color-mix(in srgb,var(--qb-design-accent) 21%,var(--line))!important;
+ box-shadow:inset 0 1px #ffffff10,var(--qb-design-shadow)!important;
+}
+body#qb-interface.light #start-screen.screen.card{
+ box-shadow:inset 0 1px #ffffff,var(--qb-design-shadow)!important;
+}
+body#qb-interface #start-screen .center::after{
+ content:"";display:block;width:46px;height:3px;margin:13px auto 0;
+ border-radius:99px;
+ background:linear-gradient(90deg,var(--qb-design-accent),#64cbd2);
+ box-shadow:0 0 17px color-mix(in srgb,var(--qb-design-accent) 35%,transparent);
+}
+body#qb-interface #start-screen .mode-tabs{
+ background:color-mix(in srgb,var(--qb-design-accent) 7%,var(--card2))!important;
+ border-color:color-mix(in srgb,var(--qb-design-accent) 15%,var(--line))!important;
+}
+body#qb-interface #start-screen .mode-tab.active{
+ background:color-mix(in srgb,var(--qb-design-accent) 13%,var(--card))!important;
+ border-color:color-mix(in srgb,var(--qb-design-accent) 35%,var(--line))!important;
+ box-shadow:0 3px 9px #00121d18!important;
+}
+body#qb-interface #start-screen .setting-card{
+ background:color-mix(in srgb,var(--qb-design-accent) 4%,var(--card2))!important;
+ border-color:color-mix(in srgb,var(--qb-design-accent) 12%,var(--line))!important;
+}
+body#qb-interface:is(:not([data-qb-palette]),[data-qb-palette="default"]) #start-screen .menu-main-btn{
+ background:linear-gradient(115deg,#0b7189,#155b88)!important;
+ box-shadow:0 10px 25px #0b718934!important;
+}
+body#qb-interface:is(:not([data-qb-palette]),[data-qb-palette="default"]) .btn-primary{
+ background:linear-gradient(115deg,#0b7189,#155b88)!important;
+}
+body#qb-interface #test-screen.screen.card{
+ box-shadow:inset 0 1px #ffffff0b,0 12px 36px #00121d35!important;
+}
+body#qb-interface.light #test-screen.screen.card{
+ box-shadow:0 12px 30px #14536b12!important;
+}
+body#qb-interface #test-screen #question{
+ background:var(--qb-accent-soft)!important;
+ border-left-color:var(--qb-design-accent)!important;
+}
+@media(prefers-reduced-motion:no-preference){
+ body#qb-interface #start-screen .mode-tab,
+ body#qb-interface #start-screen .menu-main-btn{
+  transition:background-color 180ms ease,box-shadow 180ms ease!important;
+ }
+}
