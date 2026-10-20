@@ -1,8 +1,8 @@
 /* QuizBot interface refresh. Uses the existing theme, palette and reader scale. */
 body#qb-interface{
- --qb-design-accent:#4f46e5;--qb-accent-text:#b9c2ff;--qb-accent-soft:#242c50;
- --qb-design-bg:#0b1220;--qb-design-card:#121d31;--qb-design-subtle:#19263b;
- --qb-design-text:#eef2fc;--qb-design-muted:#a8b5cc;--qb-design-line:#35445d;
+ --qb-design-accent:#4854a4;--qb-accent-text:#b9c6f1;--qb-accent-soft:#293552;
+ --qb-design-bg:#101827;--qb-design-card:#172337;--qb-design-subtle:#1e2b3e;
+ --qb-design-text:#eef2f8;--qb-design-muted:#b1bfd3;--qb-design-line:#394a61;
  --qb-control-border:#6c7e9c;--qb-good-text:#71e2b1;--qb-good-bg:#123a30;
  --qb-bad-text:#ffb5bc;--qb-bad-bg:#482731;--qb-design-shadow:0 12px 36px #00000020;
  --bg:var(--qb-design-bg)!important;--bg2:var(--qb-design-card)!important;
@@ -11,24 +11,29 @@ body#qb-interface{
  --line:var(--qb-design-line)!important;--blue:var(--qb-design-accent)!important;
  --qb-study-accent:var(--qb-accent-text);--qb-study-soft:var(--qb-accent-soft);
  color:var(--txt)!important;line-height:1.5;
- background:radial-gradient(ellipse at 50% 0%,#24326344,transparent 36rem),var(--bg)!important;
+ background:radial-gradient(ellipse at 50% 0%,#60729a24,transparent 36rem),var(--bg)!important;
  padding:16px 12px max(24px,env(safe-area-inset-bottom))!important;
 }
 body#qb-interface.light{
- color-scheme:light;--qb-design-bg:#f2f5fb;--qb-design-card:#fff;--qb-design-subtle:#f5f7fc;
- --qb-design-text:#17213a;--qb-design-muted:#52627c;--qb-design-line:#d8e0ed;
- --qb-control-border:#8291aa;--qb-accent-text:#3730a3;--qb-accent-soft:#eeedff;
+ color-scheme:light;--qb-design-bg:#f4f6f9;--qb-design-card:#fff;--qb-design-subtle:#f7f8fb;
+ --qb-design-text:#223047;--qb-design-muted:#596780;--qb-design-line:#dbe2ea;
+ --qb-control-border:#8493a8;--qb-accent-text:#4854a4;--qb-accent-soft:#eef0fa;
  --qb-good-text:#086044;--qb-good-bg:#e9f8f0;--qb-bad-text:#9f1d35;--qb-bad-bg:#fff0f2;
  --qb-design-shadow:0 10px 30px #26345c0a;
- background:radial-gradient(ellipse at 50% 0%,#e6e9ff,transparent 34rem),var(--bg)!important;
+ background:radial-gradient(ellipse at 50% 0%,#e9edf7,transparent 34rem),var(--bg)!important;
 }
 body#qb-interface:not(.light){color-scheme:dark}
-body#qb-interface[data-qb-palette="ocean"]{--qb-design-accent:#03668d}
-body#qb-interface[data-qb-palette="amethyst"]{--qb-design-accent:#6d28d9}
-body#qb-interface[data-qb-palette="rose"]{--qb-design-accent:#b83268}
-body#qb-interface[data-qb-palette="emerald"]{--qb-design-accent:#047857}
-body#qb-interface[data-qb-palette="sunset"]{--qb-design-accent:#b54716}
-body#qb-interface[data-qb-palette="midnight"]{--qb-design-accent:#3156bd}
+body#qb-interface[data-qb-palette="ocean"]{--qb-design-accent:#17648a}
+body#qb-interface[data-qb-palette="amethyst"]{--qb-design-accent:#7057a3}
+body#qb-interface[data-qb-palette="rose"]{--qb-design-accent:#a84e60}
+body#qb-interface[data-qb-palette="emerald"]{--qb-design-accent:#137158}
+body#qb-interface[data-qb-palette="sunset"]{--qb-design-accent:#a75834}
+body#qb-interface[data-qb-palette="midnight"]{--qb-design-accent:#3d5286}
+body#qb-interface[data-qb-palette="lagoon"]{--qb-design-accent:#0b6876;--qb-a:#0b6876;--qb-b:#8cbec1}
+body#qb-interface[data-qb-palette="orchid"]{--qb-design-accent:#8b4e74;--qb-a:#8b4e74;--qb-b:#d3a9c4}
+body#qb-interface[data-qb-palette="moss"]{--qb-design-accent:#547145;--qb-a:#547145;--qb-b:#b0c59c}
+body#qb-interface[data-qb-palette="copper"]{--qb-design-accent:#8c5a39;--qb-a:#8c5a39;--qb-b:#d2ad8c}
+body#qb-interface[data-qb-palette="slate"]{--qb-design-accent:#374f67;--qb-a:#374f67;--qb-b:#a0b2c0}
 body#qb-interface[data-qb-palette]:not([data-qb-palette="default"]){--qb-accent-text:color-mix(in srgb,var(--qb-design-accent) 40%,#fff);--qb-accent-soft:color-mix(in srgb,var(--qb-design-accent) 18%,var(--card))}
 body#qb-interface.light[data-qb-palette]:not([data-qb-palette="default"]){--qb-accent-text:var(--qb-design-accent);--qb-accent-soft:color-mix(in srgb,var(--qb-design-accent) 8%,#fff)}
 body#qb-interface :is(button,a,input,select,textarea,[tabindex]):focus-visible{
@@ -173,6 +178,12 @@ body#qb-interface .qb-plus-dialog,body#qb-interface .subject-picker-panel,body#q
 body#qb-interface .qb-plus-head{padding:18px!important;border-color:var(--line)!important}
 body#qb-interface .qb-plus-head h2{font-size:20px!important;font-weight:650!important;line-height:1.3!important}
 body#qb-interface .qb-plus-head p{font-size:13px!important;line-height:1.5!important}
+body#qb-interface .qb-palette-dialog{width:min(430px,100%)!important;padding:20px!important}
+body#qb-interface .qb-palette-dialog>p{color:var(--muted)!important;font-size:13px!important;line-height:1.5!important;margin:10px 0 0!important}
+body#qb-interface .qb-palette-grid{gap:9px!important;max-height:min(54dvh,520px);overflow-y:auto;scrollbar-gutter:stable;padding:2px!important}
+body#qb-interface .qb-palette-choice{min-height:76px!important;border-color:var(--line)!important;background:var(--card2)!important;border-radius:13px!important;font-weight:650!important}
+body#qb-interface .qb-palette-choice[aria-pressed="true"]{border-color:var(--qb-design-accent)!important;background:var(--qb-accent-soft)!important}
+body#qb-interface .qb-palette-swatches i{width:24px;height:24px;border:1px solid #00000014;box-shadow:0 1px 3px #00000016}
 body#qb-interface .qb-plus-body#qb-interface{padding:16px 18px 20px!important}
 body#qb-interface :is(.qb-plus-close,.subject-picker-close,.qb-palette-close){min-width:40px!important;min-height:40px!important;border-radius:12px!important;background:var(--card2)!important;color:var(--txt)!important;border-color:var(--line)!important}
 body#qb-interface .qb-map-number{min-height:40px!important;font-size:13px!important;border-radius:10px!important;font-variant-numeric:tabular-nums}
@@ -230,8 +241,7 @@ body#qb-interface[data-qb-motion="off"] *,body#qb-interface[data-qb-motion="off"
  body#qb-interface #side-drawer.qb-drawer-v2 .qb-drawer-item:hover{background:var(--card2)!important}
 }
 @media(prefers-reduced-motion:no-preference){
- body#qb-interface .btn,body#qb-interface .menu-toggle,body#qb-interface .icon-btn{transition:transform 150ms ease-out,background-color 150ms ease-out!important}
- body#qb-interface :is(.btn,.menu-toggle,.icon-btn):active:not(:disabled){transform:scale(.96)!important}
+ body#qb-interface .btn,body#qb-interface .menu-toggle,body#qb-interface .icon-btn{transition:background-color 150ms ease-out!important}
 }
 @media(prefers-reduced-motion:reduce){body#qb-interface *,body#qb-interface *::before,body#qb-interface *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media(forced-colors:active){body#qb-interface :is(button,a,input,select,textarea,[tabindex]):focus-visible{outline-color:Highlight!important}}
