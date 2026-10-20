@@ -115,7 +115,7 @@
   const print=document.createElement('section');print.id='qb-print-sheet';document.body.append(print);
   const originalRender=window.renderQuestion;window.renderQuestion=function(){const r=originalRender.apply(this,arguments);questionTools();return r};
   const originalReview=window.renderReview;window.renderReview=function(details){const r=originalReview.apply(this,arguments);resultTools(details);return r};
-  const originalScreen=window.showScreen;window.showScreen=function(id){const r=originalScreen.apply(this,arguments);if(id!=='test-screen'){document.body.classList.remove('qb-focus');focusButton.setAttribute('aria-pressed','false')}if(id==='start-screen')dashboard();if(id!=='list-screen')cards.hidden=true;if(dialog.open)dialog.close();return r};
+  const originalScreen=window.showScreen;window.showScreen=function(id){const r=originalScreen.apply(this,arguments);if(id!=='test-screen'){document.body.classList.remove('qb-focus')}if(id==='start-screen')dashboard();if(id!=='list-screen')cards.hidden=true;if(dialog.open)dialog.close();return r};
   const originalList=window.showListScreen;window.showListScreen=function(title){const r=originalList.apply(this,arguments);cards.hidden=blocked()||!String(title).startsWith('Изучить тесты');return r};
   for(const name of ['finishTest','finishRealExam']){const fn=window[name];window[name]=function(){const before=history().length;const r=fn.apply(this,arguments);if(history().length>before){decorateHistory();dashboard()}return r}}
   const subject=window.setCurrentSubject;window.setCurrentSubject=function(){const r=subject.apply(this,arguments);dashboard();return r};
